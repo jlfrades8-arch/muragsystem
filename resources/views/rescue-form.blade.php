@@ -41,7 +41,7 @@
             <div class="pet-block">
                 <h4>Pet #{{ $startIndex + 1 }}</h4>
 
-                <label>Full Name of the User:</label>
+                <label>Full Name of the Rescuer:</label>
                 <input type="text" name="pets[{{ $startIndex }}][full_name]" required>
 
                 <label>Address where you saw the pet:</label>
@@ -56,8 +56,15 @@
                 <label>Kind of pet:</label>
                 <input type="text" name="pets[{{ $startIndex }}][kind]" required>
 
+                <!-- ✅ Fixed: Added color to same pets[...] group -->
+                <label>Color of Pet:</label>
+                <input type="text" name="pets[{{ $startIndex }}][color]" required>
+
                 <label>Contact number:</label>
                 <input type="tel" name="pets[{{ $startIndex }}][contact]" required>
+
+                <input type="hidden" name="pets[{{ $startIndex }}][status]" value="Pending">
+
             </div>
         </div>
 
@@ -66,7 +73,7 @@
     </form>
 
     <br>
-    <a href="{{ route('dashboard') }}">Back to Dashboard</a>
+    <a href="{{ route('login') }}">Back to Login</a>
 
 </body>
 </html>

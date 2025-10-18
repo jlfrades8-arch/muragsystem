@@ -92,7 +92,6 @@
     <div class="container">
         <!-- Sidebar -->
     <div class="sidebar">
-        <button onclick="window.location.href='{{ route('rescue.form') }}'">Rescuing</button>
         <button onclick="window.location.href='{{ route('adoption') }}'">Adoption</button>
         <button onclick="window.location.href='{{ route('logout') }}'" style="margin-top: 20px;">Logout</button>
     </div>
@@ -100,28 +99,18 @@
 
         <!-- Main content -->
         <div class="content">
-            <!-- Rescuing Section -->
+            <!-- Adoption Section (rescued pets from DB) -->
             <div class="section">
-                <h3>About Rescuing</h3>
-                <ul>
-                    <li>Injured puppy rescued near park</li>
-                    <li>Cat trapped on rooftop</li>
-                    <li>Stray dog found in alley</li>
-                    <li>Bird with broken wing</li>
-                    <li>Dog abandoned near shelter</li>
-                </ul>
-            </div>
-
-            <!-- Adoption Section -->
-            <div class="section">
-                <h3>About Adoption</h3>
-                <ul>
-                    <li>Luna the cat adopted</li>
-                    <li>2 puppies rehomed</li>
-                    <li>Rabbit available for adoption</li>
-                    <li>Senior dog looking for home</li>
-                    <li>New kittens up for adoption</li>
-                </ul>
+                <h3>Available for Adoption</h3>
+                @if(isset($rescuedPets) && $rescuedPets->isNotEmpty())
+                    <ul>
+                        @foreach($rescuedPets as $pet)
+                            <li>{{ $pet->full_name ?? 'Unknown' }} — {{ $pet->kind }} ({{ $pet->color }})</li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p>No pets available for adoption right now.</p>
+                @endif
             </div>
         </div>
     </div>

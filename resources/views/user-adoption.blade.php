@@ -83,7 +83,6 @@
     <div class="container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <button onclick="window.location.href='{{ route('rescue.form') }}'">Rescuing</button>
             <button onclick="window.location.href='{{ route('adoption') }}'">Adoption</button>
             <button onclick="window.location.href='{{ route('logout') }}'" style="margin-top: 20px;">Logout</button>
         </div>
@@ -100,14 +99,21 @@
                 <p style="color:red;">{{ session('error') }}</p>
             @endif
 
-            @foreach($pets as $pet)
+            @forelse($pets as $pet)
                 <div class="pet-card">
-                    <p><strong>Name:</strong> {{ $pet['name'] }}</p>
-                    <p><strong>Kind:</strong> {{ $pet['kind'] }}</p>
-                    <p><strong>Age:</strong> {{ $pet['age'] }} years</p>
-                    <a href="{{ route('adoption.form', $pet['id']) }}"><button>Adopt</button></a>
+                    @if(!empty($pet->image_url))
+                        <img src="{{ $pet->image_url }}" alt="pet-image" style="width:150px;height:150px;object-fit:cover;border-radius:8px;float:right;margin-left:20px;" />
+                    @endif
+                    <h3 style="margin-top:0">{{ $pet->pet_name ?? ($pet->full_name ? 'Pet of ' . $pet->full_name : 'Unnamed Pet') }}</h3>
+                    <p><strong>Rescuer:</strong> {{ $pet->full_name ?? 'Unknown' }}</p>
+                    <p><strong>Kind:</strong> {{ $pet->kind }}</p>
+                    <p><strong>Color:</strong> {{ $pet->color }}</p>
+                    <p><strong>Condition:</strong> {{ $pet->condition }}</p>
+                    <a href="{{ route('adoption.form', $pet->id) }}"><button>Adopt</button></a>
                 </div>
-            @endforeach
+            @empty
+                <p>No pets available for adoption right now.</p>
+            @endforelse
         </div>
     </div>
 

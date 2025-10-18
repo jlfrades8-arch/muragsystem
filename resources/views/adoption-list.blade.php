@@ -21,14 +21,17 @@
 
     @foreach($pets as $pet)
         <div class="pet">
-            <p><strong>Name:</strong> {{ $pet['name'] }}</p>
-            <p><strong>Kind:</strong> {{ $pet['kind'] }}</p>
-            <p><strong>Age:</strong> {{ $pet['age'] }} years</p>
-            <a href="{{ route('adoption.form', $pet['id']) }}"><button>Adopt</button></a>
+            @if(!empty($pet->image))
+                <img src="{{ asset('storage/' . $pet->image) }}" alt="pet-image" style="width:120px;height:120px;object-fit:cover;border-radius:6px;float:right;margin-left:12px;" />
+            @endif
+            <p><strong>Name:</strong> {{ $pet['full_name'] ?? ($pet['name'] ?? 'Unknown') }}</p>
+            <p><strong>Kind:</strong> {{ $pet->kind ?? $pet['kind'] }}</p>
+            <p><strong>Age:</strong> {{ $pet->age ?? '—' }} years</p>
+            <a href="{{ route('adoption.form', $pet->id) }}"><button>Adopt</button></a>
         </div>
     @endforeach
 
     <br>
-    <a href="{{ route('dashboard') }}">Back to Dashboard</a>
+    <a href="{{ route('login') }}">Back to Login</a>
 </body>
 </html>

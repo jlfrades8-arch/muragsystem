@@ -3,56 +3,62 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Rescue;
 
 class RescueController extends Controller
 {
     // Show the rescue form
-public function showForm()
-{
-    // Get all rescued pets from session
-    $pets = session('rescued_pets', []);
+    public function form()
+    {
+        $nextIndex = Rescue::count();
+        return view('rescue-form', compact('nextIndex'));
+    }
 
-    // Count how many pets have already been submitted
-    $nextIndex = count($pets);
-
-    // Return view with pets and nextIndex
-    return view('rescue-form', compact('pets', 'nextIndex'));
-}
-
-    // Handle form submission
+    // Persist submitted rescue(s) to the database
     public function submitForm(Request $request)
     {
         $validated = $request->validate([
-            'pets' => 'required|array|min:1',
-            'pets.*.full_name' => 'required|string|max:255',
+            'pets.*.full_name' => 'required|string',
             'pets.*.address' => 'required|string',
             'pets.*.location' => 'required|string',
             'pets.*.condition' => 'required|string',
             'pets.*.kind' => 'required|string',
+            'pets.*.color' => 'nullable|string',
             'pets.*.contact' => 'required|string',
         ]);
 
-        // Merge new pets into session
-        $allPets = session('rescued_pets', []);
-        $allPets = array_merge($allPets, $validated['pets']);
-        session(['rescued_pets' => $allPets]);
+        foreach ($validated['pets'] as $petData) {
+            // Ensure new reports start as 'Cannot be adopted yet'
+            if (!isset($petData['status']) || empty($petData['status'])) {
+                $petData['status'] = 'Cannot be adopted yet';
+            }
+            Rescue::create($petData);
+        }
 
-        return redirect()->route('rescue.confirmation');
+        return redirect()->route('rescue.list')->with('success', 'Pet reported successfully!');
     }
 
-    // Show confirmation
-    public function confirmation()
+    // List rescues from database
+    public function list()
     {
-        $pets = session('rescued_pets', []);
-        return view('rescue-confirmation', compact('pets'));
+        $pets = Rescue::orderBy('created_at', 'desc')->get();
+        return view('rescue-list', compact('pets'));
     }
-    // Show all reported pets
-public function list()
-{
-    // Get all rescued pets from session
-    $pets = session('rescued_pets', []);
 
-    return view('rescue-list', compact('pets'));
-}
+    // Mark a rescue as rescued (by id)
+    public function markRescued($id)
+    {
+        // only admins are allowed to mark as rescued
+        if (session('role') !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized');
+        }
 
+        $rescue = Rescue::find($id);
+        if ($rescue) {
+            // Admin action: set the pet as rescued (moves it into admin adoption flow)
+            $rescue->update(['status' => 'Rescued']);
+        }
+
+        return redirect()->route('dashboard')->with('success', 'Pet marked as Rescued successfully!');
+    }
 }

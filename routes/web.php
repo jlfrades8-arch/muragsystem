@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RescueController;
 use App\Http\Controllers\AdoptionController;
+use App\Http\Controllers\AdminAdoptionController;
+use App\Http\Controllers\AdminRescueController;
 
 // Login routes
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
@@ -19,15 +21,29 @@ Route::post('/register/admin', [AuthController::class, 'registerAdmin'])->name('
 
 // Dashboard and logout
 Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+// Allow both GET and POST for logout so views that POST (with CSRF) work and GET links still function.
+Route::match(['get','post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Rescue routes
-Route::get('/rescue', [RescueController::class, 'showForm'])->name('rescue.form');
+Route::get('/rescue', [RescueController::class, 'form'])->name('rescue.form');
 Route::post('/rescue', [RescueController::class, 'submitForm'])->name('rescue.submit');
 Route::get('/rescue/confirmation', [RescueController::class, 'confirmation'])->name('rescue.confirmation');
 Route::get('/rescue/list', [RescueController::class, 'list'])->name('rescue.list');
+Route::post('/rescue/mark-rescued/{id}', [RescueController::class, 'markRescued'])->name('rescue.markRescued');
+
 
 // Adoption routes integrated into dashboard
 Route::get('/adoption', [AdoptionController::class, 'index'])->name('adoption'); // Pet list
-Route::get('/adoption/form/{id}', [AdoptionController::class, 'form'])->name('adoption.form'); // Adoption form
+Route::get('/adoption/form/{id}', [AdoptionController::class, 'form'])->name('adoption.form'); // Adoption form (detail)
 Route::post('/adoption/submit', [AdoptionController::class, 'submit'])->name('adoption.submit'); // Submit adoption
+
+// Admin adoption view (admin-specific)
+Route::get('/admin/adoption', [AdminAdoptionController::class, 'index'])->name('admin.adoption');
+
+// Admin rescue reports
+Route::get('/admin/rescue-reports', [AdminRescueController::class, 'index'])->name('admin.rescue.reports');
+Route::get('/admin/rescue/{id}', [AdminRescueController::class, 'show'])->name('rescue.show');
+Route::post('/admin/rescue/{id}/status', [AdminRescueController::class, 'updateStatus'])->name('rescue.updateStatus');
+Route::post('/admin/rescue/{id}/upload-image', [AdminRescueController::class, 'uploadImage'])->name('rescue.uploadImage');
+Route::post('/admin/rescue/{id}/update-name', [AdminRescueController::class, 'updateName'])->name('rescue.updateName');
+Route::post('/admin/rescue/{id}/update-pet-name', [AdminRescueController::class, 'updatePetName'])->name('rescue.updatePetName');

@@ -4,7 +4,10 @@
     <title>Login</title>
 </head>
 <body>
-    <h2>Login</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2>Login</h2>
+        <a href="{{ route('rescue.form') }}"><button style="padding:6px 10px;background:#2b6cb0;color:#fff;border:none;border-radius:4px;">Rescuing</button></a>
+    </div>
 
     @if(session('success'))
         <p style="color:green;">{{ session('success') }}</p>

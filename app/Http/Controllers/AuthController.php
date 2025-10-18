@@ -2,6 +2,9 @@
 namespace App\Http\Controllers; 
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Session; 
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Rescue;
 class AuthController extends Controller 
 { 
     // ===== SHOW LOGIN PAGE ===== 
@@ -11,21 +14,25 @@ class AuthController extends Controller
     }
      // ===== HANDLE LOGIN ===== 
     public function login(Request $request)
-    { 
-        $email = $request->input('email'); 
-        $password = $request->input('password');
-         // Simple hardcoded credentials for demo only 
-        if ($email === 'admin@gmail.com' && $password === 'admin123') {
-             session(['role' => 'admin', 'user_email' => $email]);
-             return redirect()->route('dashboard');
-             } elseif ($email === 'user@gmail.com' && $password === 'user123') {
-             session(['role' => 'user', 'user_email' => $email]);
-              return redirect()->route('dashboard'); 
-            } else { return back()->with('error', 'Invalid credentials');
-         }
-     } 
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $user = User::where('email', $request->input('email'))->first();
+
+        if (!$user || !Hash::check($request->input('password'), $user->password)) {
+            return back()->with('error', 'Invalid credentials');
+        }
+
+        // store minimal session info (this app uses session for simple auth)
+        session(['role' => $user->role, 'user_email' => $user->email, 'user_id' => $user->id]);
+
+        return redirect()->route('dashboard');
+    }
      // ===== REGISTER SELECT PAGE =====
-     public function showRegisterSelect() 
+     public function showRegisterSelect()       
      {
          return view('register');
      }
@@ -42,23 +49,56 @@ class AuthController extends Controller
       // ===== HANDLE REGISTER USER ===== 
      public function registerUser(Request $request)
      {
-         // Fake registration (no DB) 
-        return redirect()->route('login')->with('success', 'User registered successfully!');
+         $request->validate([
+             'name' => 'required|string',
+             'email' => 'required|email|unique:users,email',
+             'password' => 'required|min:6|confirmed',
+         ]);
+
+         $user = User::create([
+             'name' => $request->input('name'),
+             'email' => $request->input('email'),
+             'password' => Hash::make($request->input('password')),
+             'role' => 'user',
+         ]);
+
+         return redirect()->route('login')->with('success', 'User registered successfully!');
      }
       // ===== HANDLE REGISTER ADMIN ===== 
      public function registerAdmin(Request $request) 
      {
-         // Fake registration (no DB) 
-        return redirect()->route('login')->with('success', 'Admin registered successfully!');
+         $request->validate([
+             'name' => 'required|string',
+             'email' => 'required|email|unique:users,email',
+             'password' => 'required|min:6|confirmed',
+         ]);
+
+         $user = User::create([
+             'name' => $request->input('name'),
+             'email' => $request->input('email'),
+             'password' => Hash::make($request->input('password')),
+             'role' => 'admin',
+         ]);
+
+         return redirect()->route('login')->with('success', 'Admin registered successfully!');
      }
       // ===== DASHBOARD ===== 
-     public function showDashboard()
-     { $role = session('role');
-         if ($role === 'admin') { return view('admin-dashboard'); 
-        } elseif ($role === 'user') { return view('user-dashboard'); 
-        } else { return redirect()->route('login');
+    public function showDashboard()
+    {
+        $role = session('role');
+        if ($role === 'admin') {
+            $pets = Rescue::orderBy('created_at', 'desc')->get();
+            return view('admin-dashboard', compact('pets'));
+        } elseif ($role === 'user') {
+            // Show adoption list as the main user dashboard (pets ready for adoption)
+            $pets = Rescue::where('status', 'Ready for Adoption')->orderBy('created_at', 'desc')->get();
+            return view('user-adoption', compact('pets'));
+        } else {
+            return redirect()->route('login');
         }
-     } // ===== LOGOUT ===== 
+    }
+
+    // ===== LOGOUT ===== 
      public function logout() 
      { Session::flush();
          return redirect()->route('login')->with('success', 'You have logged out.'); 

@@ -21,6 +21,7 @@
                 <p><strong>Location:</strong> {{ $pet['location'] }}</p>
                 <p><strong>Condition:</strong> {{ $pet['condition'] }}</p>
                 <p><strong>Kind:</strong> {{ $pet['kind'] }}</p>
+                <p><strong>Color of Pet:</strong> {{ $latest['color'] }}</p>
                 <p><strong>Contact:</strong> {{ $pet['contact'] }}</p>
             </div>
         @endforeach
@@ -33,7 +34,7 @@
         <button type="submit">Add More Pet</button>
     </form>
 
-    <a href="{{ route('dashboard') }}" style="margin-left: 15px;">Back to Dashboard</a>
+    <a href="{{ route('login') }}" style="margin-left: 15px;">Back to Login</a>
 
 </body>
 </html>

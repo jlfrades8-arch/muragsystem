@@ -1,31 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Adopt {{ $pet['name'] }}</title>
+    <title>Available Pets for Adoption</title>
     <style>
-        body { font-family: Arial; margin:20px; }
-        label { display:block; margin-top:8px; }
-        input { width:100%; padding:8px; margin-top:4px; }
-        button { margin-top:12px; padding:10px 15px; cursor:pointer; }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .pet-block { 
+            margin-bottom: 20px; 
+            padding: 15px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            background-color: #f9f9f9; 
+        }
+        button { 
+            padding: 8px 12px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        button:hover { background-color: #218838; }
     </style>
 </head>
 <body>
-    <h2>Adopt {{ $pet['name'] }}</h2>
 
-    <form action="{{ route('adoption.submit') }}" method="POST">
-        @csrf
-        <input type="hidden" name="pet_id" value="{{ $pet['id'] }}">
+<h2>Available Pets for Adoption</h2>
 
-        <label>Your Name:</label>
-        <input type="text" name="adopter_name" required>
+@if(count($pets) === 0)
+    <p>No pets are available for adoption at the moment.</p>
+@else
+    @foreach($pets as $index => $pet)
+        <div class="pet-block">
+            <h4>Pet #{{ $index + 1 }}</h4>
+            <p><strong>Kind:</strong> {{ $pet['kind'] }}</p>
+            <p><strong>Color:</strong> {{ $pet['color'] }}</p>
+            <p><strong>Condition:</strong> {{ $pet['condition'] }}</p>
 
-        <label>Contact Number:</label>
-        <input type="text" name="contact" required>
+            <!-- ✅ Adopt button with pet data -->
+            <form action="{{ route('adoption.form') }}" method="GET">
+                <input type="hidden" name="kind" value="{{ $pet['kind'] }}">
+                <input type="hidden" name="color" value="{{ $pet['color'] }}">
+                <input type="hidden" name="condition" value="{{ $pet['condition'] }}">
+                <button type="submit">Adopt</button>
+            </form>
+        </div>
+    @endforeach
+@endif
 
-        <button type="submit">Submit Adoption</button>
-    </form>
+<a href="{{ route('login') }}">← Back to Login</a>
 
-    <br>
-    <a href="{{ route('adoption') }}">Back to Pet List</a>
 </body>
 </html>
+        
