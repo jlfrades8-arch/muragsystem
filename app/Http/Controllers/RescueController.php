@@ -28,9 +28,9 @@ class RescueController extends Controller
         ]);
 
         foreach ($validated['pets'] as $petData) {
-            // Ensure new reports start as 'Cannot be adopted yet'
-            if (!isset($petData['status']) || empty($petData['status'])) {
-                $petData['status'] = 'Cannot be adopted yet';
+            // Ensure new reports start as 'not yet rescue'
+                if (!isset($petData['status']) || empty($petData['status'])) {
+                    $petData['status'] = 'not yet rescue';
             }
             Rescue::create($petData);
         }

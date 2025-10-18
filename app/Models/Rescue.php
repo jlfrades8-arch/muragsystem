@@ -20,6 +20,8 @@ class Rescue extends Model
         'contact',
         'status',
         'image',
+        'adopter_email',
+        'adopter_name',
     ];
 
     /**

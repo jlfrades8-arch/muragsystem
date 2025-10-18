@@ -41,8 +41,19 @@ class AdoptionController extends Controller
             return redirect()->route('adoption')->with('error', 'Pet not available for adoption.');
         }
 
-        $pet->update(['status' => 'Adopted']);
+    $pet->update(['status' => 'Adopted', 'adopter_email' => session('user_email'), 'adopter_name' => $validated['adopter_name']]);
 
-        return redirect()->route('adoption')->with('success', 'Adoption completed. Thank you!');
+        return redirect()->route('my.adoptions')->with('success', 'Adoption completed. Thank you!');
+    }
+
+    // Show the current user's adopted pets
+    public function myAdoptions()
+    {
+        $email = session('user_email');
+        if (!$email) {
+            return redirect()->route('adoption')->with('error', 'Please log in to see your adoptions.');
+        }
+        $pets = Rescue::where('adopter_email', $email)->orderBy('updated_at', 'desc')->get();
+        return view('my-adoptions', compact('pets'));
     }
 }

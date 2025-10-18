@@ -32,9 +32,9 @@
             <p class="meta"><strong>Kind:</strong> {{ $pet->kind }}  <strong>Color:</strong> {{ $pet->color }}</p>
             <p><strong>Status:</strong>
                 @php
-                    // In DB flow: when admin first marks a report as 'Rescued', it should appear here as the default 'Cannot be adopted yet'
-                    $raw = $pet->status ?? 'Cannot be adopted yet';
-                    $st = ($raw === 'Rescued') ? 'Cannot be adopted yet' : $raw;
+                    // In DB flow: if the record's status is 'Rescued' we want to display 'Rescued'; otherwise show the raw status or default to 'not yet rescue'
+                    $raw = $pet->status ?? 'not yet rescue';
+                    $st = ($raw === 'Rescued') ? 'Rescued' : $raw;
                 @endphp
                     <div style="display:flex; gap:8px; align-items:center;">
                         <button class="status-btn" onclick="changeStatus({{ $pet->id }}, this)"
@@ -61,8 +61,8 @@
     <script>
         async function changeStatus(id, btn) {
             const current = btn.innerText.trim();
-            // only allow changing from 'Cannot be adopted yet' to 'Ready for Adoption'
-            if (current === 'Cannot be adopted yet') {
+            // allow changing from 'not yet rescue' or 'Rescued' to 'Ready for Adoption'
+            if (current === 'not yet rescue' || current === 'Rescued') {
                 if (!confirm('Change status to Ready for Adoption?')) return;
                 const token = '{{ csrf_token() }}';
                 try {
@@ -75,8 +75,8 @@
                     if (data.success) {
                         const statusText = data.status || 'Ready for Adoption';
                         btn.innerText = statusText;
-                        // styling: Cannot (red), Ready (green), Adopted (green disabled)
-                        if (statusText === 'Cannot be adopted yet') {
+                // styling: not yet rescue (red), Ready (green), Adopted (green disabled), Rescued (red label)
+                    if (statusText === 'not yet rescue' || statusText === 'Rescued') {
                             btn.style.background = '#e53e3e';
                             btn.style.color = '#fff';
                         } else if (statusText === 'Ready for Adoption') {

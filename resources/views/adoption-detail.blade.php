@@ -20,7 +20,6 @@
     <p><strong>Rescuer:</strong> {{ $pet->full_name ?? 'Unknown' }}</p>
     <p><strong>Kind:</strong> {{ $pet->kind }}</p>
         <p><strong>Color:</strong> {{ $pet->color }}</p>
-        <p><strong>Condition:</strong> {{ $pet->condition }}</p>
 
         <form action="{{ route('adoption.submit') }}" method="POST">
             @csrf

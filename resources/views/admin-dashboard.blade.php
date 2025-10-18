@@ -63,7 +63,7 @@
                         <td>{{ $pet['contact'] ?? 'N/A' }}</td>
                         <td>
                             @php $s = $pet['status'] ?? 'Pending'; @endphp
-                            @if($s === 'Pending' || $s === 'Cannot be adopted yet')
+                            @if($s === 'Pending' || $s === 'not yet rescue')
                                 <!-- Pending Response (red) -->
                                 <button onclick="markAsRescued({{ $pet->id }}, this)" data-id="{{ $pet->id }}" style="background:#e53e3e;color:#fff;border:none;padding:6px 10px;border-radius:6px;">Pending Response</button>
                             @elseif($s === 'Ready for Adoption')
@@ -86,7 +86,7 @@
     </div>
     <script>
         async function markAsRescued(id, btn) {
-        if (!confirm('Mark this pet as rescued?')) return;
+        if (!confirm('Marked this pet as rescued?')) return;
             const token = '{{ csrf_token() }}';
             try {
                 const res = await fetch('/admin/rescue/' + id + '/status', {
@@ -98,7 +98,7 @@
                 if (data.success) {
                     // update the existing button to preserve design
                     const statusText = data.status || 'Pending';
-                    if (statusText === 'Pending' || statusText === 'Cannot be adopted yet') {
+                    if (statusText === 'Pending' || statusText === 'not yet rescue') {
                         btn.style.background = '#e53e3e';
                         btn.style.color = '#fff';
                         btn.innerText = 'Pending Response';

@@ -37,8 +37,8 @@
                 @php $status = $pet->status ?? 'Pending'; @endphp
                 @if($status === 'Pending')
                     <p><strong>Status:</strong> <span class="status-pending">⏳ Pending Rescue</span></p>
-                @elseif($status === 'Cannot be adopted yet')
-                    <p><strong>Status:</strong> <span class="status-pending">Cannot be adopted yet</span></p>
+                @elseif($status === 'not yet rescue')
+                    <p><strong>Status:</strong> <span class="status-pending">not yet rescue</span></p>
                 @elseif($status === 'Ready for Adoption')
                     <p><strong>Status:</strong> <span class="status-rescued">Ready for Adoption</span></p>
                 @elseif($status === 'Adopted')
@@ -46,7 +46,7 @@
                 @else
                     <p><strong>Status:</strong> <span>{{ $status }}</span></p>
                 @endif
-                @if(session('role') === 'admin' && $status === 'Cannot be adopted yet')
+                @if(session('role') === 'admin' && $status === 'not yet rescue')
                     <button style="background:#2b6cb0;color:#fff;border:none;padding:8px 10px;border-radius:6px;" onclick="markRescued({{ $pet->id }})">Set Ready for Adoption</button>
                 @endif
         </div>

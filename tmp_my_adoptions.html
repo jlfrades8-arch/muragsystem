@@ -77,43 +77,24 @@
 
     <!-- Header -->
     <div class="header">
-        Welcome, {{ session('user_email') ?? 'User' }}
+        Welcome, User
     </div>
 
     <div class="container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <button onclick="window.location.href='{{ route('adoption') }}'">Adoption</button>
-            <button onclick="window.location.href='{{ route('logout') }}'" style="margin-top: 20px;">Logout</button>
+            <button onclick="window.location.href='http://127.0.0.1:8000/adoption'">Adoption</button>
+            <button onclick="window.location.href='http://127.0.0.1:8000/logout'" style="margin-top: 20px;">Logout</button>
         </div>
 
         <!-- Main content -->
         <div class="content">
             <h2>Pets Available for Adoption</h2>
 
-            @if(session('success'))
-                <p style="color:green;">{{ session('success') }}</p>
-            @endif
-
-            @if(session('error'))
-                <p style="color:red;">{{ session('error') }}</p>
-            @endif
-
-            @forelse($pets as $pet)
-                <div class="pet-card">
-                    @if(!empty($pet->image_url))
-                        <img src="{{ $pet->image_url }}" alt="pet-image" style="width:150px;height:150px;object-fit:cover;border-radius:8px;float:right;margin-left:20px;" />
-                    @endif
-                    <p><strong>Pet Name:</strong> {{ $pet->pet_name ?? ($pet->full_name ? 'Pet of ' . $pet->full_name : 'Unnamed Pet') }}</p>
-                    <p><strong>Rescuer:</strong> {{ $pet->full_name ?? 'Unknown' }}</p>
-                    <p><strong>Kind:</strong> {{ $pet->kind }}</p>
-                    <p><strong>Color:</strong> {{ $pet->color }}</p>
-                    <a href="{{ route('adoption.form', $pet->id) }}"><button>Adopt</button></a>
-                </div>
-            @empty
-                <p>No pets available for adoption right now.</p>
-            @endforelse
-        </div>
+            
+            
+                            <p>No pets available for adoption right now.</p>
+                    </div>
     </div>
 
 </body>

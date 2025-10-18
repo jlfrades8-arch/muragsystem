@@ -34,13 +34,13 @@
             <h4>Pet #{{ $index + 1 }}</h4>
             <p><strong>Kind:</strong> {{ $pet['kind'] }}</p>
             <p><strong>Color:</strong> {{ $pet['color'] }}</p>
-            <p><strong>Condition:</strong> {{ $pet['condition'] }}</p>
+           
 
             <!-- ✅ Adopt button with pet data -->
             <form action="{{ route('adoption.form') }}" method="GET">
                 <input type="hidden" name="kind" value="{{ $pet['kind'] }}">
                 <input type="hidden" name="color" value="{{ $pet['color'] }}">
-                <input type="hidden" name="condition" value="{{ $pet['condition'] }}">
+        
                 <button type="submit">Adopt</button>
             </form>
         </div>

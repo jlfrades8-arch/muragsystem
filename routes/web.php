@@ -36,6 +36,7 @@ Route::post('/rescue/mark-rescued/{id}', [RescueController::class, 'markRescued'
 Route::get('/adoption', [AdoptionController::class, 'index'])->name('adoption'); // Pet list
 Route::get('/adoption/form/{id}', [AdoptionController::class, 'form'])->name('adoption.form'); // Adoption form (detail)
 Route::post('/adoption/submit', [AdoptionController::class, 'submit'])->name('adoption.submit'); // Submit adoption
+Route::get('/my-adoptions', [AdoptionController::class, 'myAdoptions'])->name('my.adoptions');
 
 // Admin adoption view (admin-specific)
 Route::get('/admin/adoption', [AdminAdoptionController::class, 'index'])->name('admin.adoption');

@@ -5,9 +5,7 @@
 </head>
 <body>
     <h2>User Registration</h2>
-    <div style="margin-bottom:12px;">
-        <a href="{{ route('rescue.form') }}"><button style="padding:6px 10px;background:#2b6cb0;color:#fff;border:none;border-radius:4px;">Rescuing</button></a>
-    </div>
+   
     <form action="{{ route('register.user.submit') }}" method="POST">
         @csrf
         @if($errors->any())
