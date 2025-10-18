@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Rescue;
+use App\Models\Adoption;
 
 class AdoptionController extends Controller
 {
@@ -41,7 +42,15 @@ class AdoptionController extends Controller
             return redirect()->route('adoption')->with('error', 'Pet not available for adoption.');
         }
 
-    $pet->update(['status' => 'Adopted', 'adopter_email' => session('user_email'), 'adopter_name' => $validated['adopter_name']]);
+        // create adoption record and mark rescue as adopted
+        Adoption::create([
+            'rescue_id' => $pet->id,
+            'adopter_name' => $validated['adopter_name'],
+            'adopter_email' => session('user_email'),
+            'adopted_at' => now(),
+        ]);
+
+        $pet->update(['status' => 'Adopted']);
 
         return redirect()->route('my.adoptions')->with('success', 'Adoption completed. Thank you!');
     }
@@ -53,7 +62,8 @@ class AdoptionController extends Controller
         if (!$email) {
             return redirect()->route('adoption')->with('error', 'Please log in to see your adoptions.');
         }
-        $pets = Rescue::where('adopter_email', $email)->orderBy('updated_at', 'desc')->get();
-        return view('my-adoptions', compact('pets'));
+
+        $adoptions = Adoption::with('rescue')->where('adopter_email', $email)->orderBy('adopted_at', 'desc')->get();
+        return view('my-adoptions', compact('adoptions'));
     }
 }

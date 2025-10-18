@@ -21,7 +21,8 @@
         <div class="content">
             <h2>My Adopted Pets</h2>
             @if(session('success')) <p style="color:green">{{ session('success') }}</p> @endif
-            @forelse($pets as $pet)
+            @forelse($adoptions as $adoption)
+                @php $pet = $adoption->rescue; @endphp
                 <div class="pet-card">
                     @if(!empty($pet->image_url))
                         <img src="{{ $pet->image_url }}" alt="pet-image" style="width:150px;height:150px;object-fit:cover;border-radius:8px;float:right;margin-left:20px;" />
@@ -31,6 +32,7 @@
                     <p><strong>Kind:</strong> {{ $pet->kind }}</p>
                     <p><strong>Color:</strong> {{ $pet->color }}</p>
                     <p><strong>Condition:</strong> {{ $pet->condition }}</p>
+                    <p style="margin-top:10px"><em>Adopted by: {{ $adoption->adopter_name }}  {{ optional($adoption->adopted_at)->format('Y-m-d') }}</em></p>
                 </div>
             @empty
                 <p>You haven't adopted any pets yet.</p>
