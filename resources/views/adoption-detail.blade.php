@@ -120,7 +120,7 @@
                 <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 px-6 py-5">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Adoption Request Form
                     </h3>
@@ -156,15 +156,15 @@
                                     <span class="text-red-500 ml-1">*</span>
                                 </span>
                             </label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 id="adopter_name"
-                                name="adopter_name" 
+                                name="adopter_name"
                                 required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-gray-900 font-medium"
                                 placeholder="Enter your full name">
                             @error('adopter_name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -179,15 +179,15 @@
                                     <span class="text-red-500 ml-1">*</span>
                                 </span>
                             </label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 id="contact"
-                                name="contact" 
+                                name="contact"
                                 required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-gray-900 font-medium"
                                 placeholder="Enter your contact number">
                             @error('contact')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -210,16 +210,16 @@
 
                     <!-- Submit Button -->
                     <div class="mt-8 flex gap-4">
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                             </svg>
                             Submit Adoption Request
                         </button>
-                        <a 
-                            href="{{ route('adoption.list') }}" 
+                        <a
+                            href="{{ route('adoption.list') }}"
                             class="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md inline-flex items-center justify-center">
                             Cancel
                         </a>

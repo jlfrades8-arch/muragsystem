@@ -97,11 +97,11 @@ class AuthController extends Controller
         } elseif ($role === 'user') {
             // Show adoption list as the main user dashboard (pets ready for adoption)
             $pets = Rescue::where('status', 'Ready for Adoption')->orderBy('created_at', 'desc')->get();
-            
+
             // Get user's adoptions count
             $userEmail = session('user_email');
             $adoptionsCount = Adoption::where('adopter_email', $userEmail)->count();
-            
+
             return view('user-dashboard', compact('pets', 'adoptionsCount'));
         } else {
             return redirect()->route('login');

@@ -276,17 +276,17 @@
               </button>
 
               <!-- Dropdown Menu -->
-              <div x-show="open" 
-                   @click.away="open = false"
-                   x-transition:enter="transition ease-out duration-200"
-                   x-transition:enter-start="opacity-0 scale-95"
-                   x-transition:enter-end="opacity-100 scale-100"
-                   x-transition:leave="transition ease-in duration-150"
-                   x-transition:leave-start="opacity-100 scale-100"
-                   x-transition:leave-end="opacity-0 scale-95"
-                   class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
-                   style="display: none;">
-                
+              <div x-show="open"
+                @click.away="open = false"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
+                style="display: none;">
+
                 <!-- User Info Header -->
                 <div class="px-4 py-3 border-b border-gray-100">
                   <p class="text-sm font-semibold text-gray-800">{{ session('user_name', session('user_email')) }}</p>

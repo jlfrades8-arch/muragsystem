@@ -66,7 +66,7 @@ class RescueController extends Controller
         if ($rescue) {
             // Admin action: set the pet as Ready for Adoption (makes it available for users to adopt)
             $rescue->update(['status' => 'Ready for Adoption']);
-            
+
             if (request()->expectsJson() || request()->ajax()) {
                 return response()->json(['success' => true, 'message' => 'Pet is now ready for adoption!']);
             }
