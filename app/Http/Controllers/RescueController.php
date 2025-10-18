@@ -25,13 +25,22 @@ class RescueController extends Controller
             'pets.*.kind' => 'required|string',
             'pets.*.color' => 'nullable|string',
             'pets.*.contact' => 'required|string',
+            'pets.*.image' => 'nullable|image|mimes:jpeg,jpg,png|max:10240', // 10MB max
         ]);
 
-        foreach ($validated['pets'] as $petData) {
-            // Ensure new reports start as 'not yet rescue'
-                if (!isset($petData['status']) || empty($petData['status'])) {
-                    $petData['status'] = 'not yet rescue';
+        foreach ($validated['pets'] as $index => $petData) {
+            // Handle image upload
+            if ($request->hasFile("pets.{$index}.image")) {
+                $image = $request->file("pets.{$index}.image");
+                $imagePath = $image->store('rescues', 'public');
+                $petData['image'] = $imagePath;
             }
+
+            // Ensure new reports start as 'not yet rescue'
+            if (!isset($petData['status']) || empty($petData['status'])) {
+                $petData['status'] = 'not yet rescue';
+            }
+
             Rescue::create($petData);
         }
 
@@ -55,10 +64,14 @@ class RescueController extends Controller
 
         $rescue = Rescue::find($id);
         if ($rescue) {
-            // Admin action: set the pet as rescued (moves it into admin adoption flow)
-            $rescue->update(['status' => 'Rescued']);
+            // Admin action: set the pet as Ready for Adoption (makes it available for users to adopt)
+            $rescue->update(['status' => 'Ready for Adoption']);
+            
+            if (request()->expectsJson() || request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Pet is now ready for adoption!']);
+            }
         }
 
-        return redirect()->route('dashboard')->with('success', 'Pet marked as Rescued successfully!');
+        return redirect()->route('dashboard')->with('success', 'Pet is now ready for adoption!');
     }
 }

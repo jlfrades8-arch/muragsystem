@@ -11,14 +11,19 @@ class AdminRescueController extends Controller
     public function index()
     {
         $pets = Rescue::orderBy('created_at', 'desc')->get();
-        return view('admin-reports', compact('pets'));
+        $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue'])->count();
+        return view('admin-reports', compact('pets', 'pendingCount'));
     }
 
     public function show($id)
     {
         $pet = Rescue::find($id);
         if (!$pet) return redirect()->route('admin.rescue.reports')->with('status', 'Pet not found');
-        return view('rescue-detail-admin', compact('pet'));
+        
+        $pets = Rescue::orderBy('created_at', 'desc')->get();
+        $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue'])->count();
+        
+        return view('rescue-detail-admin', compact('pet', 'pets', 'pendingCount'));
     }
 
     public function updateStatus(Request $request, $id)

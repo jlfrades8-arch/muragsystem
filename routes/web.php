@@ -7,12 +7,17 @@ use App\Http\Controllers\AdoptionController;
 use App\Http\Controllers\AdminAdoptionController;
 use App\Http\Controllers\AdminRescueController;
 
+// Welcome page
+Route::get('/', function () {
+  return view('welcome');
+})->name('welcome');
+
 // Login routes
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/', [AuthController::class, 'login'])->name('login.submit');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
 // Registration selection and forms
-Route::get('/register', [AuthController::class, 'showRegisterSelect'])->name('register.select');
+Route::get('/register', [AuthController::class, 'showRegisterSelect'])->name('register');
 Route::get('/register/user', [AuthController::class, 'showRegisterUser'])->name('register.user');
 Route::get('/register/admin', [AuthController::class, 'showRegisterAdmin'])->name('register.admin');
 
@@ -21,8 +26,9 @@ Route::post('/register/admin', [AuthController::class, 'registerAdmin'])->name('
 
 // Dashboard and logout
 Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
+Route::get('/user/dashboard', [AuthController::class, 'showDashboard'])->name('user.dashboard');
 // Allow both GET and POST for logout so views that POST (with CSRF) work and GET links still function.
-Route::match(['get','post'], '/logout', [AuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Rescue routes
 Route::get('/rescue', [RescueController::class, 'form'])->name('rescue.form');
@@ -33,7 +39,7 @@ Route::post('/rescue/mark-rescued/{id}', [RescueController::class, 'markRescued'
 
 
 // Adoption routes integrated into dashboard
-Route::get('/adoption', [AdoptionController::class, 'index'])->name('adoption'); // Pet list
+Route::get('/adoption', [AdoptionController::class, 'index'])->name('adoption.list'); // Pet list
 Route::get('/adoption/form/{id}', [AdoptionController::class, 'form'])->name('adoption.form'); // Adoption form (detail)
 Route::post('/adoption/submit', [AdoptionController::class, 'submit'])->name('adoption.submit'); // Submit adoption
 Route::get('/my-adoptions', [AdoptionController::class, 'myAdoptions'])->name('my.adoptions');
