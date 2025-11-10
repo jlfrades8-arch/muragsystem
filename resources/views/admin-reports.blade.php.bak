@@ -5,9 +5,101 @@
 @section('page-subtitle', 'View and manage all rescue reports')
 
 @section('content')
-@php
-    // Stats cards removed from this view — they are shown only on the Dashboard
-@endphp
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Reports Card -->
+    <div class="group relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-100 hover:border-blue-300 hover:-translate-y-1">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="relative p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">Total</span>
+            </div>
+            <p class="text-sm font-semibold text-gray-600 mb-1">Total Reports</p>
+            <p class="text-4xl font-black text-gray-900 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{{ $pets->count() }}</p>
+            <div class="mt-3 flex items-center text-xs text-blue-600 font-medium">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
+                </svg>
+                All reports tracked
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Card -->
+    <div class="group relative overflow-hidden bg-gradient-to-br from-red-50 via-white to-rose-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-red-100 hover:border-red-300 hover:-translate-y-1">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-400/20 to-rose-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="relative p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform duration-300 animate-pulse">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">Urgent</span>
+            </div>
+            <p class="text-sm font-semibold text-gray-600 mb-1">Pending</p>
+            <p class="text-4xl font-black text-gray-900 bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">{{ $pets->whereIn('status', ['Pending', 'not yet rescue'])->count() }}</p>
+            <div class="mt-3 flex items-center text-xs text-red-600 font-medium">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Needs attention
+            </div>
+        </div>
+    </div>
+
+    <!-- Rescued Card -->
+    <div class="group relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-emerald-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-green-100 hover:border-green-300 hover:-translate-y-1">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="relative p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Safe</span>
+            </div>
+            <p class="text-sm font-semibold text-gray-600 mb-1">Rescued</p>
+            <p class="text-4xl font-black text-gray-900 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{{ $pets->whereIn('status', ['Rescued', 'Ready for Adoption'])->count() }}</p>
+            <div class="mt-3 flex items-center text-xs text-green-600 font-medium">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Successfully rescued
+            </div>
+        </div>
+    </div>
+
+    <!-- Adopted Card -->
+    <div class="group relative overflow-hidden bg-gradient-to-br from-purple-50 via-white to-pink-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-purple-100 hover:border-purple-300 hover:-translate-y-1">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="relative p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">Forever Home</span>
+            </div>
+            <p class="text-sm font-semibold text-gray-600 mb-1">Adopted</p>
+            <p class="text-4xl font-black text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{{ $pets->where('status', 'Adopted')->count() }}</p>
+            <div class="mt-3 flex items-center text-xs text-purple-600 font-medium">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
+                </svg>
+                Happy endings
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Reported Pets Table -->
 <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
     <div class="bg-gradient-to-r from-purple-50 via-pink-50 to-rose-50 p-6 border-b border-gray-200">
@@ -151,85 +243,3 @@
     @endif
 </div>
 @endsection
-
-    @push('scripts')
-    <script>
-        // Delegate clicks for pending/rescue buttons
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('.mark-rescued-btn');
-            if (!btn) return;
-
-            const petId = btn.dataset.petId;
-            const currentStatus = btn.dataset.status || '';
-
-            // Only handle Pending-like statuses here
-            if (!['Pending', 'not yet rescue'].includes(currentStatus) && currentStatus !== '') {
-                return;
-            }
-
-            e.preventDefault();
-
-            if (!confirm('Mark a Pet as Rescued?')) return;
-
-            const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-            const token = tokenMeta ? tokenMeta.getAttribute('content') : '';
-
-            // Optimistically disable button
-            const originalHTML = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerText = 'Updating...';
-
-            fetch('/admin/rescue/' + encodeURIComponent(petId) + '/status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify({ status: 'Rescued' })
-            })
-            .then(resp => resp.json())
-            .then(data => {
-                if (data && data.success) {
-                    // Replace the button with a disabled 'Rescued' label
-                    const span = document.createElement('span');
-                    span.className = 'px-4 py-2.5 inline-flex items-center text-xs font-bold rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 shadow-sm';
-                    span.innerHTML = '<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Rescued';
-                    btn.replaceWith(span);
-                    showNotification('Pet marked as rescued', 'success');
-                } else {
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
-                    showNotification((data && data.message) ? data.message : 'Update failed', 'error');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                btn.disabled = false;
-                btn.innerHTML = originalHTML;
-                showNotification('Network error occurred', 'error');
-            });
-        });
-
-        // Small notification helper (keeps same style as dashboard)
-        function showNotification(message, type) {
-            const colors = {
-                success: 'bg-green-50 border-green-500 text-green-800',
-                error: 'bg-red-50 border-red-500 text-red-800'
-            };
-
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 p-4 border-l-4 rounded-r-lg shadow-lg z-50 ${colors[type]}`;
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
-                    <p class="font-medium">${message}</p>
-                </div>
-            `;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
-        }
-    </script>
-    @endpush

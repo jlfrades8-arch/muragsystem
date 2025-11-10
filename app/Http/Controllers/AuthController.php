@@ -33,6 +33,12 @@ class AuthController extends Controller
         // store minimal session info (this app uses session for simple auth)
         session(['role' => $user->role, 'user_email' => $user->email, 'user_id' => $user->id]);
 
+        // Ensure admins land on the admin dashboard first
+        if ($user->role === 'admin') {
+            return redirect()->route('dashboard');
+        }
+
+        // Regular users go to the user dashboard
         return redirect()->route('dashboard');
     }
     // ===== REGISTER SELECT PAGE =====

@@ -3,8 +3,10 @@
 @section('title', 'My Adoptions')
 @section('page-title', 'My Adopted Pets')
 @section('page-subtitle', 'View and manage your adopted companions')
+@section('hide-sidebar', true)
 
 @section('content')
+@include('partials.user-header')
 <!-- Stats Card -->
 <div class="mb-8">
     <div class="bg-white rounded-2xl shadow-lg border border-green-100 p-6 inline-flex items-center space-x-4">
@@ -126,19 +128,7 @@
                 </div>
                 @endif
 
-                @if(!empty($pet->condition))
-                <div class="flex items-center space-x-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-100">
-                    <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 font-semibold">Condition</p>
-                        <p class="text-lg text-gray-900 font-black">{{ $pet->condition }}</p>
-                    </div>
-                </div>
-                @endif
+                {{-- condition removed per UX request --}}
             </div>
 
             <!-- Adoption Details -->

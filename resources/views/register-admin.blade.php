@@ -10,8 +10,8 @@
 
 <body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-        <!-- Header -->
-        <div class="text-center mb-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mb-4 shadow-lg">
                 <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
@@ -19,6 +19,16 @@
             </div>
             <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Admin Account</h1>
             <p class="text-gray-600">Manage rescue operations and help save lives</p>
+        </div>
+
+        <!-- Back to Selection -->
+        <div class="mb-6">
+            <a href="{{ route('register') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-sm transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to Selection
+            </a>
         </div>
 
         <!-- Registration Card -->

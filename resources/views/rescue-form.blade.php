@@ -136,9 +136,30 @@
                                 <label for="address" class="block text-sm font-bold text-gray-700 mb-2">
                                     Address <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" id="address" name="pets[{{ $startIndex }}][address]" required
-                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-gray-900 font-medium"
-                                    placeholder="Street address where you saw the pet">
+                                <select id="address" name="pets[{{ $startIndex }}][address]" required
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-gray-900 font-medium">
+                                    <option value=""></option>     
+                                    <option value="Banlasan, Trinidad, Bohol">Banlasan, Trinidad, Bohol</option>
+                                    <option value="Bongbong, Trinidad, Bohol">Bongbong, Trinidad, Bohol</option>
+                                    <option value="Catoogan, Trinidad, Bohol">Catoogan, Trinidad, Bohol</option>
+                                    <option value="Guinobtan, Trinidad, Bohol">Guinobatan, Trinidad, Bohol</option>
+                                    <option value="Hinlayagan Ilaud, Trinidad, Bohol">Hinlayagan Ilaud, Trinidad, Bohol</option>
+                                    <option value="Hinlayagan Ilaya, Trinidad, Bohol">Hinlayagan Ilaya, Trinidad, Bohol</option>
+                                    <option value="Kauswagan, Trinidad, Bohol">Kauswagan, Trinidad, Bohol</option>
+                                    <option value="Kinan-oan, Trinidad, Bohol">Kinan-oan, Trinidad, Bohol</option>
+                                    <option value="La Union, Trinidad, Bohol">La Union, Trinidad, Bohol</option>
+                                    <option value="La Victoria, Trinidad, Bohol">La Victoria, Trinidad, Bohol</option>
+                                    <option value="Mahagbu, Trinidad, Bohol">Mahagbu, Trinidad, Bohol</option>
+                                    <option value="M. Roxas, Trinidad, Bohol">M. Roxas, Trinidad, Bohol</option>
+                                    <option value="Poblacion, Trinidad, Bohol">Poblacion, Trinidad, Bohol</option>
+                                    <option value="San Isidro, Trinidad, Bohol">San Isidro, Trinidad, Bohol</option>
+                                    <option value="San Vicente, Trinidad, Bohol">San Vicente, Trinidad, Bohol</option>
+                                    <option value="Santo Tomas, Trinidad, Bohol">Santo Tomas, Trinidad, Bohol</option>
+                                    <option value="Soom, Trinidad, Bohol">Soom, Trinidad, Bohol</option>
+                                    <option value="Tagum Norte, Trinidad, Bohol">Tagum Norte, Trinidad, Bohol</option>
+                                    <option value="Tagum Sur, Trinidad, Bohol">Tagum Sur, Trinidad, Bohol</option>
+
+                                </select>
                             </div>
 
                             <div>
@@ -189,27 +210,53 @@
                                 <label for="kind" class="block text-sm font-bold text-gray-700 mb-2">
                                     Type of Pet <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" id="kind" name="pets[{{ $startIndex }}][kind]" required
-                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-900 font-medium"
-                                    placeholder="e.g., Dog, Cat, Bird">
+                                <select id="kind" name="pets[{{ $startIndex }}][kind]" required
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-900 font-medium">
+                                    <option value=""></option>
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Bird">Bird</option>
+                                    <option value="Rabbit">Rabbit</option>
+                                    <option value="Goat">Goat</option>
+                                    <option value="Hamster">Hamster</option>
+                                    <option value="Sheep">Sheep</option>
+
+                                </select>
                             </div>
 
                             <div>
                                 <label for="color" class="block text-sm font-bold text-gray-700 mb-2">
                                     Color <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" id="color" name="pets[{{ $startIndex }}][color]" required
-                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-900 font-medium"
-                                    placeholder="e.g., Brown, Black and White">
+                                <select id="color" name="pets[{{ $startIndex }}][color]" required
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-900 font-medium">
+                                    <option value=""></option>
+                                    <option value="Brown">Brown</option>
+                                    <option value="Black">Black</option>
+                                    <option value="White">White</option>
+                                    <option value="Black and White">Black and White</option>
+                                    <option value="Gray">Gray</option>
+                                    <option value="Black and Orange">Black and Orange</option>
+                                    <option value="Golden">Golden</option>
+                                    <option value="Mixed">Mixed</option>
+
+                                </select>
                             </div>
 
                             <div class="md:col-span-2">
                                 <label for="condition" class="block text-sm font-bold text-gray-700 mb-2">
                                     Condition <span class="text-red-500">*</span>
                                 </label>
-                                <textarea id="condition" name="pets[{{ $startIndex }}][condition]" required rows="3"
-                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-900 font-medium resize-none"
-                                    placeholder="Describe the pet's condition (e.g., injured, healthy, scared, hungry)"></textarea>
+                                <select id="condition" name="pets[{{ $startIndex }}][condition]" required
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-gray-900 font-medium">
+                                    <option value=""></option>
+                                    <option value="Injured">Injured</option>
+                                    <option value="Healthy">Healthy</option>
+                                    <option value="Scared">Scared</option>
+                                    <option value="Hungry">Hungry</option>
+                                    <option value="Lost">Lost</option>
+                                    <option value="Skinny">Skinny</option>
+                                </select>
                             </div>
 
                             <!-- Pet Photo Upload -->
@@ -254,12 +301,21 @@
 
                 <!-- Form Actions -->
                 <div class="mt-8 flex items-center justify-between border-t-2 border-gray-200 pt-6">
-                    <a href="{{ route('login') }}" class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all">
+                    @if(session('user_email'))
+                    <a href="{{ route('user.dashboard') }}" class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
-                        Back to Login
+                        Back to Dashboard
                     </a>
+                    @else
+                    <a href="{{ route('welcome') }}" class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back to Home
+                    </a>
+                    @endif
                     <button type="submit" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-2xl hover:scale-105">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>

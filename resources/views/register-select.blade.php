@@ -116,15 +116,15 @@
             </a>
         </div>
 
-        <!-- Back to Login -->
+        <!-- Back to Home -->
         <div class="text-center">
             <p class="text-gray-600 mb-4">Already have an account?</p>
-            <a href="{{ route('login') }}"
+            <a href="{{ route('welcome') }}"
                 class="inline-flex items-center text-purple-600 hover:text-purple-700 font-semibold transition duration-200">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                Back to Login
+                Back to Home
             </a>
         </div>
 

@@ -3,9 +3,12 @@
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard')
 @section('page-subtitle', 'Your pet adoption journey starts here')
+@section('hide-sidebar', true)
 
 @section('content')
 <!-- Main Content -->
+
+@include('partials.user-header')
 
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -33,13 +36,13 @@
     </div>
 
     <!-- My Adoptions -->
-    <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-green-100 p-6 hover:-translate-y-1">
+    <div class="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-md transition-all duration-300 border border-gray-100 p-6 transform hover:-translate-y-0.5">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-semibold text-gray-600 mb-1">My Adoptions</p>
-                <p class="text-4xl font-black text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text">{{ $adoptionsCount ?? 0 }}</p>
+                <p class="text-4xl font-extrabold text-gray-900">{{ $adoptionsCount ?? 0 }}</p>
             </div>
-            <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div class="w-16 h-16 bg-clip-padding rounded-xl flex items-center justify-center shadow-inner" style="background:linear-gradient(135deg,#34d399,#10b981);">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
@@ -54,15 +57,15 @@
     </div>
 
     <!-- Total Rescued -->
-    <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-100 p-6 hover:-translate-y-1">
+    <div class="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-md transition-all duration-300 border border-gray-100 p-6 transform hover:-translate-y-0.5">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-semibold text-gray-600 mb-1">Total Rescued</p>
-                <p class="text-4xl font-black text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text">
+                <p class="text-4xl font-extrabold text-gray-900">
                     {{ isset($pets) ? $pets->count() : 0 }}
                 </p>
             </div>
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div class="w-16 h-16 bg-clip-padding rounded-xl flex items-center justify-center shadow-inner" style="background:linear-gradient(135deg,#60a5fa,#7c3aed);">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                 </svg>
@@ -77,23 +80,9 @@
     </div>
 </div>
 
-<!-- Available Pets Section -->
-<div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-    <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 p-6">
-        <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-            </div>
-            <div class="text-white">
-                <h2 class="text-xl font-bold">Available for Adoption</h2>
-                <p class="text-purple-100 text-sm">Find your perfect companion</p>
-            </div>
-        </div>
-    </div>
+@include('partials.adoption-hero')
 
-    <div class="p-8">
+<div class="p-8">
         @if(isset($pets) && $pets->isNotEmpty())
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($pets as $pet)

@@ -13,7 +13,9 @@ class AdoptionController extends Controller
     {
         // show rescues that have status 'Ready for Adoption' (available for adoption)
         $pets = Rescue::where('status', 'Ready for Adoption')->orderBy('created_at', 'desc')->get();
-        return view('user-adoption', compact('pets'));
+    // Return the adoption listing view. Browse Pets should show the
+    // adoption list, not the full dashboard.
+    return view('user-adoption', compact('pets'));
     }
 
     // Show adoption form for selected pet

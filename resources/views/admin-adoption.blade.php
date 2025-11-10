@@ -14,8 +14,12 @@
         <div class="relative group overflow-hidden">
             <img src="{{ asset('storage/' . $pet->image) }}"
                 alt="{{ $pet->pet_name ?? 'Pet' }} photo"
-                class="w-full h-64 object-cover transition-transform group-hover:scale-110 duration-300" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                class="w-full h-64 object-cover transition-transform group-hover:scale-110 duration-300 pet-image-{{ $pet->id }}" />
+            <button type="button" class="change-photo-btn absolute top-3 right-3 bg-white/90 text-xs px-3 py-1 rounded-lg shadow-sm hover:bg-white transform transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center gap-2" data-pet-id="{{ $pet->id }}">
+                <svg class="w-3.5 h-3.5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l3-3h4l3 3h4v11a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6"></path></svg>
+                <span class="text-xs font-semibold">Change</span>
+            </button>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
                 <div class="absolute bottom-0 left-0 right-0 p-4">
                     <p class="text-white text-lg font-bold flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -25,6 +29,7 @@
                     </p>
                 </div>
             </div>
+            <input type="file" accept="image/*" class="hidden upload-input-admin" data-pet-id="{{ $pet->id }}">
         </div>
         @else
         <div class="bg-gradient-to-br from-gray-100 to-gray-200 h-64 flex items-center justify-center border-b-2 border-dashed border-gray-300">
@@ -34,6 +39,10 @@
                 </svg>
                 <p class="text-gray-500 text-sm font-medium">{{ $pet->pet_name ?? 'Unnamed Pet' }}</p>
                 <p class="text-gray-400 text-xs mt-1">No photo available</p>
+                <div class="mt-3">
+                    <button type="button" class="change-photo-btn inline-flex items-center px-3 py-1.5 bg-white border border-gray-200 rounded text-sm font-semibold hover:bg-gray-50" data-pet-id="{{ $pet->id }}">Add Photo</button>
+        <input type="file" accept="image/*" class="hidden upload-input-admin" data-pet-id="{{ $pet->id }}">
+                </div>
             </div>
         </div>
         @endif
@@ -103,13 +112,24 @@
             $raw = $pet->status ?? 'not yet rescue';
             $st = ($raw === 'Rescued') ? 'Rescued' : $raw;
 
-            // Then use it for statusColor
-            $statusColor = $st === 'Ready for Adoption' ? 'from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-green-500/30 hover:shadow-green-500/50' : 'from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/30 hover:shadow-red-500/50';
-            if ($st === 'Adopted') {
-            $statusColor = 'from-purple-500 to-pink-500 opacity-60 cursor-not-allowed';
+            // Determine button color and disabled state
+            if ($st === 'Ready for Adoption') {
+                $statusColor = 'from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-green-500/30 hover:shadow-green-500/50';
+                $disabled = false;
+            } elseif ($st === 'Adopted') {
+                $statusColor = 'from-purple-500 to-pink-500 opacity-60 cursor-not-allowed';
+                $disabled = true;
+            } elseif (strtolower($st) === 'not yet rescue') {
+                // Not yet rescued: visually muted and not clickable
+                $statusColor = 'from-gray-300 to-gray-400 text-gray-700 opacity-80 cursor-not-allowed';
+                $disabled = true;
+            } else {
+                // Pending, Rescued, etc.
+                $statusColor = 'from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/30 hover:shadow-red-500/50';
+                $disabled = false;
             }
             @endphp
-            <button type="button" class="status-btn w-full px-4 py-3 bg-gradient-to-r {{ $statusColor }} text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:scale-105 flex items-center justify-center" data-pet-id="{{ $pet->id }}" data-current-status="{{ $st }}" {{ $st === 'Adopted' ? 'disabled' : '' }}>
+            <button type="button" class="status-btn w-full px-4 py-3 bg-gradient-to-r {{ $statusColor }} text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:scale-105 flex items-center justify-center" data-pet-id="{{ $pet->id }}" data-current-status="{{ $st }}" {{ $disabled ? 'disabled' : '' }}>
                 @if($st === 'Ready for Adoption')
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -167,68 +187,80 @@
     });
 
     async function changeStatus(id, btn) {
-        const current = btn.dataset.currentStatus || btn.innerText.trim();
-        // allow changing from 'not yet rescue' or 'Rescued' to 'Ready for Adoption'
-        if (current === 'not yet rescue' || current === 'Rescued') {
-            if (!confirm('Change status to Ready for Adoption?')) return;
-            const token = '{{ csrf_token() }}';
-            try {
-                const res = await fetch('/admin/rescue/' + id + '/status', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: 'Ready for Adoption'
-                    })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    const statusText = data.status || 'Ready for Adoption';
+        // Normalize status text to handle capitalization differences
+        let current = (btn.dataset.currentStatus || btn.innerText || '').toString().trim();
+        const normalized = current.toLowerCase();
 
-                    // Update button classes and content
-                    btn.className = 'status-btn w-full mt-2 px-4 py-3 text-white text-sm font-bold rounded-lg transition-all';
+        // Disallow changing already adopted pets or pets that are not yet rescued
+        if (normalized === 'adopted') {
+            showNotification('This pet is already adopted and cannot be changed here', 'error');
+            return;
+        }
 
-                    if (statusText === 'not yet rescue' || statusText === 'Rescued') {
-                        btn.className += ' bg-red-500 hover:bg-red-600';
-                        btn.innerHTML = `
-                                <span class="flex items-center justify-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    ${statusText}
-                                </span>
-                            `;
-                        btn.disabled = false;
-                    } else if (statusText === 'Ready for Adoption') {
-                        btn.className += ' bg-green-500 hover:bg-green-600';
-                        btn.innerHTML = `
-                                <span class="flex items-center justify-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    ${statusText}
-                                </span>
-                            `;
-                        btn.disabled = false;
-                    } else if (statusText === 'Adopted') {
-                        btn.className += ' bg-purple-500 opacity-50 cursor-not-allowed';
-                        btn.innerHTML = `<span class="flex items-center justify-center">${statusText}</span>`;
-                        btn.disabled = true;
-                    }
+        if (normalized === 'not yet rescue') {
+            showNotification('Cannot change status: this pet has not been rescued yet', 'error');
+            return;
+        }
 
-                    showNotification('Status updated successfully!', 'success');
+        // Allow admins to change from non-final states to Ready for Adoption
+        // (e.g., 'not yet rescue', 'pending', 'rescued', etc.)
+        if (!confirm('Change status to Ready for Adoption?')) return;
+
+        const token = '{{ csrf_token() }}';
+        try {
+            const res = await fetch('/admin/rescue/' + id + '/status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ status: 'Ready for Adoption' })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                const statusText = data.status || 'Ready for Adoption';
+
+                // Update button classes and content
+                btn.className = 'status-btn w-full mt-2 px-4 py-3 text-white text-sm font-bold rounded-lg transition-all';
+
+                if (statusText.toLowerCase() === 'ready for adoption') {
+                    btn.className += ' bg-green-500 hover:bg-green-600';
+                    btn.innerHTML = `
+                        <span class="flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            ${statusText}
+                        </span>
+                    `;
+                    btn.disabled = false;
+                } else if (statusText.toLowerCase() === 'adopted') {
+                    btn.className += ' bg-purple-500 opacity-50 cursor-not-allowed';
+                    btn.innerHTML = `<span class="flex items-center justify-center">${statusText}</span>`;
+                    btn.disabled = true;
                 } else {
-                    showNotification(data.message || 'Update failed', 'error');
+                    // Other states (pending, not yet rescue, rescued)
+                    btn.className += ' bg-red-500 hover:bg-red-600';
+                    btn.innerHTML = `
+                        <span class="flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            ${statusText}
+                        </span>
+                    `;
+                    btn.disabled = false;
                 }
-            } catch (e) {
-                console.error(e);
-                showNotification('Network error occurred', 'error');
+
+                showNotification('Status updated successfully!', 'success');
+            } else {
+                showNotification(data.message || 'Update failed', 'error');
             }
-        } else {
-            showNotification('This status cannot be changed from this view', 'error');
+        } catch (e) {
+            console.error(e);
+            showNotification('Network error occurred', 'error');
         }
     }
 </script>
@@ -291,5 +323,59 @@
             notification.remove();
         }, 3000);
     }
+</script>
+<script>
+    // Image upload for adoption management (admin)
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.change-photo-btn');
+        if (!btn) return;
+        const id = btn.dataset.petId;
+        const input = document.querySelector('.upload-input-admin[data-pet-id="' + id + '"]');
+        if (input) input.click();
+    });
+
+    document.addEventListener('change', async function(e) {
+        const input = e.target.closest('.upload-input-admin');
+        if (!input) return;
+        const id = input.dataset.petId;
+        if (!input.files || !input.files[0]) return;
+
+        if (!confirm('Upload this image as the pet picture?')) {
+            input.value = null;
+            return;
+        }
+
+        const file = input.files[0];
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const res = await fetch('/admin/rescue/' + id + '/upload-image', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                const img = document.querySelector('.pet-image-' + id);
+                if (img) {
+                    img.src = data.image;
+                }
+                showNotification('Image uploaded', 'success');
+            } else {
+                showNotification(data.message || 'Upload failed', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showNotification('Network error during upload', 'error');
+        } finally {
+            input.value = null;
+        }
+    });
 </script>
 @endpush

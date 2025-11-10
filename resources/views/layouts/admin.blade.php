@@ -13,8 +13,15 @@
 
 <body class="bg-gray-50">
   <div class="min-h-screen">
-    <!-- Sidebar -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white transform transition-all duration-300 ease-in-out shadow-2xl -translate-x-full lg:translate-x-0 flex flex-col">
+    <!-- Sidebar (can be hidden by views using @section('hide-sidebar') or for certain routes like adoption.form) -->
+    @php
+      // hide sidebar when a view explicitly sets the section, when the hide_sidebar query param is present,
+      // or when rendering the adoption form so the user has a focused adoption flow.
+      $hideSidebar = View::hasSection('hide-sidebar') || request()->query('hide_sidebar') || request()->routeIs('adoption.form');
+    @endphp
+
+  @unless($hideSidebar)
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white transform transition-all duration-300 ease-in-out shadow-2xl -translate-x-full lg:translate-x-0 flex flex-col">
       <!-- Decorative Background Pattern -->
       <div class="absolute inset-0 opacity-10 pointer-events-none">
         <div class="absolute top-0 left-0 w-40 h-40 bg-pink-500 rounded-full filter blur-3xl"></div>
@@ -23,20 +30,22 @@
 
       <!-- Logo Section -->
       <div class="relative flex items-center justify-between h-20 px-6 bg-gradient-to-r from-purple-950/50 to-pink-950/50 backdrop-blur-sm border-b border-white/10">
-        <div class="flex items-center space-x-4">
-          <div class="relative">
-            <div class="w-12 h-12 bg-gradient-to-br from-pink-400 via-purple-400 to-indigo-400 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300">
-              <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
+          <div class="flex items-center space-x-4">
+            <!-- Inline logo (original placeholder) -->
+            <div class="relative">
+              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2a4 4 0 00-4 4c0 2 2 5 4 7 2-2 4-5 4-7a4 4 0 00-4-4z" />
+                  <path d="M6 14c-1 1-2 3-2 4 0 1 1 2 2 2s2-1 2-2c0-1-1-3-2-4zM18 14c1 1 2 3 2 4 0 1-1 2-2 2s-2-1-2-2c0-1 1-3 2-4z" />
+                </svg>
+              </div>
+              <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
             </div>
-            <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+            <div>
+              <h1 class="text-xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">Rescuing Pet Adoption</h1>
+              <p class="text-xs text-purple-200">{{ session('role') === 'admin' ? 'Admin Dashboard' : 'User Dashboard' }}</p>
+            </div>
           </div>
-          <div>
-            <h1 class="text-xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">Pet Rescue</h1>
-            <p class="text-xs text-purple-200">{{ session('role') === 'admin' ? 'Admin Dashboard' : 'User Dashboard' }}</p>
-          </div>
-        </div>
         <button id="closeSidebar" class="lg:hidden text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-all duration-200">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -57,7 +66,7 @@
             </p>
           </div>
           <div>
-            <a href="{{ route('dashboard') }}" class="sidebar-link group {{ request()->routeIs('dashboard') || request()->routeIs('user.dashboard') ? 'active' : '' }} mb-1 block">
+            <a href="/dashboard" class="sidebar-link group {{ request()->routeIs('dashboard') || request()->routeIs('user.dashboard') ? 'active' : '' }} mb-1 block">
               <div class="sidebar-icon-wrapper">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
@@ -92,7 +101,7 @@
               </svg>
             </a>
             @else
-            <a href="{{ route('adoption.list') }}" class="sidebar-link group {{ request()->routeIs('adoption.list') || request()->routeIs('adoption.form') ? 'active' : '' }} mb-3 block">
+            <a href="{{ (View::hasSection('hide-sidebar') || request()->query('hide_sidebar')) ? route('adoption.list', ['hide_image' => 1, 'hide_sidebar' => 1]) : route('adoption.list') }}" class="sidebar-link group {{ request()->routeIs('adoption.list') || request()->routeIs('adoption.form') ? 'active' : '' }} mb-3 block">
               <div class="sidebar-icon-wrapper">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -205,12 +214,13 @@
           </button>
         </form>
       </div>
-    </aside>
+  </aside>
+  @endunless
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col min-h-screen lg:ml-72">
+  <div class="flex-1 flex flex-col min-h-screen {{ $hideSidebar ? '' : 'lg:ml-72' }}">
       <!-- Top Navbar -->
-      <header class="bg-gradient-to-r from-white via-purple-50 to-pink-50 backdrop-blur-sm shadow-lg border-b border-purple-100 fixed top-0 right-0 left-0 lg:left-72 z-40">
+  <header class="bg-gradient-to-r from-white via-purple-50 to-pink-50 backdrop-blur-sm shadow-lg border-b border-purple-100 fixed top-0 right-0 left-0 {{ $hideSidebar ? '' : 'lg:left-72' }} z-40">
         <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
           <div class="flex items-center space-x-4">
             <!-- Mobile Menu Button -->
@@ -298,7 +308,7 @@
 
                 <!-- Menu Items -->
                 <div class="py-1">
-                  <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
+                  <a href="/dashboard" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                     </svg>

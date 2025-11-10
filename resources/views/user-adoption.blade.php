@@ -3,8 +3,11 @@
 @section('title', 'Browse Adoptions')
 @section('page-title', 'Available Pets for Adoption')
 @section('page-subtitle', 'Choose your perfect companion and give them a forever home')
+@section('hide-sidebar', true)
 
 @section('content')
+@include('partials.user-header')
+
 <!-- Pet Count Badge -->
 <div class="mb-6 inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border border-purple-200">
     <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
@@ -13,6 +16,9 @@
     <span class="text-sm font-bold text-purple-700">{{ count($pets ?? []) }} Pets Available</span>
 </div>
 
+    @include('partials.adoption-hero')
+
+    <!-- DEBUG BANNER REMOVED -->
 <!-- Content Area -->
 <!-- Alert Messages -->
 @if(session('success'))
@@ -41,19 +47,24 @@
 @forelse($pets as $pet)
 <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-100 hover:border-purple-300 mb-6 hover:-translate-y-1">
     <div class="md:flex">
-        <!-- Pet Image -->
+        <!-- Pet Image (hidden when ?hide_image=1 is present) -->
         <div class="md:w-80 h-64 md:h-auto bg-gradient-to-br from-purple-200 via-pink-200 to-rose-200 flex-shrink-0 relative overflow-hidden">
-            @if(!empty($pet->image_url))
-            <img src="{{ $pet->image_url }}" alt="{{ $pet->pet_name ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-            @elseif(!empty($pet->image))
-            <img src="{{ asset('storage/' . $pet->image) }}" alt="{{ $pet->pet_name ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            @unless(request()->query('hide_image'))
+                @if(!empty($pet->image_url))
+                <img src="{{ $pet->image_url }}" alt="{{ $pet->pet_name ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                @elseif(!empty($pet->image))
+                <img src="{{ asset('storage/' . $pet->image) }}" alt="{{ $pet->pet_name ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                @else
+                <div class="w-full h-full flex items-center justify-center">
+                    <svg class="w-24 h-24 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                </div>
+                @endif
             @else
-            <div class="w-full h-full flex items-center justify-center">
-                <svg class="w-24 h-24 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-            </div>
-            @endif
+                <!-- Image removed per user action (no <img> tag) -->
+                <div class="w-full h-full"></div>
+            @endunless
             <div class="absolute top-4 left-4">
                 <span class="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -122,23 +133,11 @@
                 </div>
                 @endif
 
-                @if(!empty($pet->condition))
-                <div class="flex items-center space-x-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-100">
-                    <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 font-semibold">Condition</p>
-                        <p class="text-lg text-gray-900 font-black">{{ $pet->condition }}</p>
-                    </div>
-                </div>
-                @endif
+                {{-- condition removed per UX request --}}
             </div>
 
             <!-- Action Button -->
-            <a href="{{ route('adoption.form', $pet->id) }}" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-700 hover:via-pink-700 hover:to-rose-700 text-white text-lg font-black rounded-xl shadow-lg hover:shadow-2xl transition-all hover:scale-105">
+            <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-700 hover:via-pink-700 hover:to-rose-700 text-white text-lg font-black rounded-xl shadow-lg hover:shadow-2xl transition-all hover:scale-105">
                 <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>

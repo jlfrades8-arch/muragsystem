@@ -25,7 +25,7 @@ class RescueController extends Controller
             'pets.*.kind' => 'required|string',
             'pets.*.color' => 'nullable|string',
             'pets.*.contact' => 'required|string',
-            'pets.*.image' => 'nullable|image|mimes:jpeg,jpg,png|max:10240', // 10MB max
+            'pets.*.image' => 'nullable|image|mimes:jpg,png|max:10240', // 10MB max
         ]);
 
         foreach ($validated['pets'] as $index => $petData) {

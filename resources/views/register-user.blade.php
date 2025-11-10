@@ -10,8 +10,8 @@
 
 <body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-        <!-- Header -->
-        <div class="text-center mb-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full mb-4 shadow-lg">
                 <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -19,6 +19,16 @@
             </div>
             <h1 class="text-3xl font-bold text-gray-800 mb-2">Create User Account</h1>
             <p class="text-gray-600">Join us in helping pets find loving homes</p>
+        </div>
+
+        <!-- Back to Selection -->
+        <div class="mb-6">
+            <a href="{{ route('register') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-sm transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to Selection
+            </a>
         </div>
 
         <!-- Registration Card -->
