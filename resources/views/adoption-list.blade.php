@@ -1,42 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Pet Adoption List - Find Your Perfect Companion</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
+@section('title', 'Pets Available')
+@section('page-title', 'Pets Available for Adoption')
+@section('page-subtitle', 'Give a rescued pet their forever home')
 
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+@section('content')
 
-    <!-- Header -->
-    <div class="bg-white shadow-lg border-b border-purple-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
-                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-3xl font-black text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text">
-                            Pets Available for Adoption
-                        </h1>
-                        <p class="text-sm text-gray-600 font-medium">Give a rescued pet their forever home</p>
-                    </div>
-                </div>
-                <a href="{{ route('login') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Back to Login
-                </a>
-            </div>
-        </div>
-    </div>
+    @include('partials.user-header')
+
+    @include('partials.adoption-hero')
 
     <!-- Alert Messages -->
     @if(session('success'))
@@ -101,28 +73,44 @@
                 <!-- Pet Image -->
                 <div class="relative h-64 bg-gradient-to-br from-purple-200 via-pink-200 to-rose-200 overflow-hidden">
                     @if(!empty($pet->image))
-                    <img src="{{ asset('storage/' . $pet->image) }}" alt="{{ $pet['full_name'] ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" aria-label="View {{ $pet['full_name'] ?? 'pet' }} details">
+                        <img src="{{ asset('storage/' . $pet->image) }}" alt="{{ $pet['full_name'] ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </a>
                     @else
-                    <div class="w-full h-full flex items-center justify-center">
-                        <svg class="w-24 h-24 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
-                    </div>
+                    <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" aria-label="View {{ $pet['full_name'] ?? 'pet' }} details">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <svg class="w-24 h-24 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                        </div>
+                    </a>
                     @endif
+                    @php
+                        $hasPendingAdoption = isset($pendingAdoptionsByRescueId[$pet->id]) && $pendingAdoptionsByRescueId[$pet->id]->count() > 0;
+                    @endphp
                     <div class="absolute top-3 right-3">
+                        @if($hasPendingAdoption)
+                        <span class="inline-flex items-center px-3 py-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full shadow-lg">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                            </svg>
+                            Pending
+                        </span>
+                        @else
                         <span class="inline-flex items-center px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                             </svg>
                             Available
                         </span>
+                        @endif
                     </div>
                 </div>
 
                 <!-- Pet Info -->
                 <div class="p-6">
                     <h3 class="text-2xl font-black text-gray-900 mb-4">
-                        {{ $pet['full_name'] ?? ($pet['name'] ?? 'Unknown') }}
+                        <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" class="hover:underline">{{ $pet['full_name'] ?? ($pet['name'] ?? 'Unknown') }}</a>
                     </h3>
 
                     <!-- Pet Details -->
@@ -136,18 +124,6 @@
                             <div>
                                 <p class="text-xs text-gray-500 font-medium">Species</p>
                                 <p class="text-sm text-gray-900 font-bold">{{ $pet->kind ?? 'Unknown' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
-                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 font-medium">Age</p>
-                                <p class="text-sm text-gray-900 font-bold">{{ $pet->age ?? '—' }} years old</p>
                             </div>
                         </div>
 
@@ -167,16 +143,26 @@
                     </div>
 
                     <!-- Action Button -->
-                    <a href="{{ route('adoption.form', $pet->id) }}" class="block w-full py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-700 hover:via-pink-700 hover:to-rose-700 text-white text-center font-black text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105">
-                        <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" class="block w-full py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-700 hover:via-pink-700 hover:to-rose-700 text-white text-center font-black text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105">
-                        <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" class="block w-full py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-700 hover:via-pink-700 hover:to-rose-700 text-white text-center font-black text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105">
-                        <div class="flex items-center justify-center space-x-2">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                            </svg>
-                            <span>Adopt Me</span>
+                    @php $hasPendingAdoption = isset($pendingAdoptionsByRescueId[$pet->id]) && $pendingAdoptionsByRescueId[$pet->id]->count() > 0; @endphp
+                    @if($hasPendingAdoption)
+                        <div class="block w-full py-3 bg-yellow-400 text-yellow-900 text-center font-black text-lg rounded-xl shadow-lg transition-all">
+                            <div class="flex items-center justify-center space-x-2">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                                </svg>
+                                <span>Pending</span>
+                            </div>
                         </div>
-                    </a>
+                    @else
+                        <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" class="block w-full py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-700 hover:via-pink-700 hover:to-rose-700 text-white text-center font-black text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                            <div class="flex items-center justify-center space-x-2">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                </svg>
+                                <span>Adopt Me</span>
+                            </div>
+                        </a>
+                    @endif
                 </div>
             </div>
             @endforeach
@@ -191,11 +177,11 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-700 mb-2">No Pets Available Right Now</h3>
             <p class="text-gray-600 mb-6">Check back soon for new pets available for adoption</p>
-            <a href="{{ route('login') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">
+            <a href="{{ route('dashboard') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
-                Back to Login
+                Back to Dashboard
             </a>
         </div>
         @endif
@@ -213,6 +199,4 @@
         </div>
     </div>
 
-</body>
-
-</html>
+@endsection

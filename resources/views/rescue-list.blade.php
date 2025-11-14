@@ -65,7 +65,15 @@
         <!-- Pet Cards Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             @foreach($pets as $index => $pet)
-            @php $status = $pet->status ?? 'Pending'; @endphp
+            @php
+                $status = $pet->status ?? 'Pending';
+                // If the rescue is marked Ready for Adoption but there is a pending adoption request,
+                // show it as Pending so other users know someone requested it.
+                $hasPendingAdoption = isset($pendingAdoptionsByRescueId[$pet->id]) && $pendingAdoptionsByRescueId[$pet->id]->count() > 0;
+                if ($status === 'Ready for Adoption' && $hasPendingAdoption) {
+                    $status = 'Pending for Adoption';
+                }
+            @endphp
             <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl border border-gray-200 overflow-hidden transition-all duration-300 hover:-translate-y-2">
                 <!-- Card Header -->
                 <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 p-4">
@@ -80,7 +88,7 @@
                             </div>
                         </div>
                         <!-- Status Badge -->
-                        @if($status === 'Pending' || $status === 'not yet rescue')
+                        @if($status === 'Pending' || $status === 'Pending for Adoption' || $status === 'not yet rescue')
                         <span class="px-3 py-1.5 bg-red-500/90 text-white rounded-full text-xs font-bold shadow-lg animate-pulse">
                             <span class="flex items-center">
                                 <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +188,7 @@
                     </div>
 
                     <!-- Admin Action -->
-                    @if(session('role') === 'admin' && ($status === 'not yet rescue' || $status === 'Pending'))
+                    @if(session('role') === 'admin' && ($status === 'not yet rescue' || $status === 'Pending' || $status === 'Pending for Adoption'))
                     <button onclick="markRescued({{ $pet->id }})" class="w-full mt-4 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -214,11 +222,11 @@
                     Back to Rescue Form
                 </a>
                 @else
-                <a href="{{ route('login') }}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-all shadow-md hover:shadow-lg border border-gray-200">
+                <a href="{{ route('dashboard') }}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-all shadow-md hover:shadow-lg border border-gray-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                     </svg>
-                    Back to Login
+                    Back to Dashboard
                 </a>
                 @endif
             @endif

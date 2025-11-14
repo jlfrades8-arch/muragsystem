@@ -12,21 +12,44 @@ class AdoptionController extends Controller
     public function index()
     {
         // show rescues that have status 'Ready for Adoption' (available for adoption)
-        $pets = Rescue::where('status', 'Ready for Adoption')->orderBy('created_at', 'desc')->get();
-    // Return the adoption listing view. Browse Pets should show the
-    // adoption list, not the full dashboard.
-    return view('user-adoption', compact('pets'));
+        $pets = Rescue::with('adoptions')->where('status', 'Ready for Adoption')->orderBy('created_at', 'desc')->get();
+
+        // Build map of pending adoptions for quick lookup in views
+        $pendingAdoptionsByRescueId = [];
+        foreach ($pets as $pet) {
+            $pending = $pet->adoptions->whereNull('adopted_at');
+            if ($pending->count() > 0) {
+                $pendingAdoptionsByRescueId[$pet->id] = $pending;
+            }
+        }
+
+        // Return the adoption listing view which can disable adopt actions for pending items.
+        return view('adoption-list', compact('pets', 'pendingAdoptionsByRescueId'));
+
+        // Build map of pending adoptions for quick lookup in views
+        $pendingAdoptionsByRescueId = [];
+        foreach ($pets as $pet) {
+            $pending = $pet->adoptions->filter(fn($a) => $a->adopted_at === null);
+            if ($pending->count() > 0) {
+                $pendingAdoptionsByRescueId[$pet->id] = $pending;
+            }
+        }
+
+        // Return the adoption listing view.
+        return view('adoption-list', compact('pets', 'pendingAdoptionsByRescueId'));
     }
 
     // Show adoption form for selected pet
     public function form($id)
     {
-        $pet = Rescue::find($id);
+        $pet = Rescue::with('adoptions')->find($id);
         if (!$pet || ($pet->status ?? '') !== 'Ready for Adoption') {
-            return redirect()->route('adoption')->with('error', 'Pet not found or not available for adoption.');
+            return redirect()->route('adoption.list')->with('error', 'Pet not found or not available for adoption.');
         }
 
-        return view('adoption-detail', compact('pet'));
+        $hasPendingAdoption = $pet->adoptions->whereNull('adopted_at')->count() > 0;
+
+        return view('adoption-detail', compact('pet', 'hasPendingAdoption'));
     }
 
     // Handle form submission
@@ -36,6 +59,7 @@ class AdoptionController extends Controller
             'pet_id' => 'required',
             'adopter_name' => 'required|string',
             'contact' => 'required|string',
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
         ]);
 
         // Persist adoption by marking the rescue record as Adopted
@@ -44,17 +68,33 @@ class AdoptionController extends Controller
             return redirect()->route('adoption')->with('error', 'Pet not available for adoption.');
         }
 
-        // create adoption record and mark rescue as adopted
+        // create adoption record but DO NOT mark the rescue as Adopted yet.
+        // The adoption remains pending until an admin confirms it.
+        // If there is already a pending adoption for this rescue, reject additional submissions
+        $existingPending = Adoption::where('rescue_id', $pet->id)->whereNull('adopted_at')->exists();
+        if ($existingPending) {
+            return redirect()->route('adoption.list')->with('error', 'This pet already has a pending adoption request.');
+        }
+
+        // Store the uploaded photo
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('adoptions', 'public');
+        }
+
         Adoption::create([
             'rescue_id' => $pet->id,
             'adopter_name' => $validated['adopter_name'],
             'adopter_email' => session('user_email'),
-            'adopted_at' => now(),
+            'photo' => $photoPath,
+            // adopted_at will be set when admin confirms the adoption
         ]);
 
-        $pet->update(['status' => 'Adopted']);
+        // Mark the rescue as pending for adoption so admins see it in the pending list
+        $pet->status = 'Pending for Adoption';
+        $pet->save();
 
-        return redirect()->route('my.adoptions')->with('success', 'Adoption completed. Thank you!');
+        return redirect()->route('my.adoptions')->with('success', 'Adoption request submitted. Pending admin confirmation.');
     }
 
     // Show the current user's adopted pets

@@ -34,7 +34,7 @@
         <button type="submit">Add More Pet</button>
     </form>
 
-    <a href="{{ route('login') }}" style="margin-left: 15px;">Back to Login</a>
+    <a href="{{ route('dashboard') }}" style="margin-left: 15px;">Back to Dashboard</a>
 
 </body>
 </html>

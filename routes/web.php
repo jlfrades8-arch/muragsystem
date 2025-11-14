@@ -27,6 +27,7 @@ Route::post('/register/admin', [AuthController::class, 'registerAdmin'])->name('
 // Dashboard and logout
 Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
 Route::get('/user/dashboard', [AuthController::class, 'showDashboard'])->name('user.dashboard');
+Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
 // Allow both GET and POST for logout so views that POST (with CSRF) work and GET links still function.
 Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -46,6 +47,8 @@ Route::get('/my-adoptions', [AdoptionController::class, 'myAdoptions'])->name('m
 
 // Admin adoption view (admin-specific)
 Route::get('/admin/adoption', [AdminAdoptionController::class, 'index'])->name('admin.adoption');
+// Cancel pending adoption(s) for a rescue (admin)
+Route::post('/admin/adoption/{id}/cancel', [AdminAdoptionController::class, 'cancel'])->name('admin.adoption.cancel');
 
 // Admin rescue reports
 Route::get('/admin/rescue-reports', [AdminRescueController::class, 'index'])->name('admin.rescue.reports');
@@ -54,3 +57,7 @@ Route::post('/admin/rescue/{id}/status', [AdminRescueController::class, 'updateS
 Route::post('/admin/rescue/{id}/upload-image', [AdminRescueController::class, 'uploadImage'])->name('rescue.uploadImage');
 Route::post('/admin/rescue/{id}/update-name', [AdminRescueController::class, 'updateName'])->name('rescue.updateName');
 Route::post('/admin/rescue/{id}/update-pet-name', [AdminRescueController::class, 'updatePetName'])->name('rescue.updatePetName');
+
+// Admin settings
+Route::get('/admin/settings', [AuthController::class, 'showAdminSettings'])->name('admin.settings');
+Route::post('/admin/settings', [AuthController::class, 'updateAdminSettings'])->name('admin.settings.update');

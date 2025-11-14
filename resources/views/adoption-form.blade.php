@@ -47,7 +47,7 @@
     @endforeach
 @endif
 
-<a href="{{ route('login') }}">← Back to Login</a>
+<a href="{{ route('dashboard') }}">← Back to Dashboard</a>
 
 </body>
 </html>

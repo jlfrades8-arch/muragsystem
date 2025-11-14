@@ -18,10 +18,12 @@
       // hide sidebar when a view explicitly sets the section, when the hide_sidebar query param is present,
       // or when rendering the adoption form so the user has a focused adoption flow.
       $hideSidebar = View::hasSection('hide-sidebar') || request()->query('hide_sidebar') || request()->routeIs('adoption.form');
+      // Only show the sidebar for admin users. Non-admin users will have a clean, full-width layout.
+      $showSidebar = session('role') === 'admin' && !$hideSidebar;
     @endphp
 
-  @unless($hideSidebar)
-  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white transform transition-all duration-300 ease-in-out shadow-2xl -translate-x-full lg:translate-x-0 flex flex-col">
+  @if($showSidebar)
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white transform transition-all duration-300 ease-in-out shadow-2xl -translate-x-full lg:translate-x-0 flex flex-col top-16">
       <!-- Decorative Background Pattern -->
       <div class="absolute inset-0 opacity-10 pointer-events-none">
         <div class="absolute top-0 left-0 w-40 h-40 bg-pink-500 rounded-full filter blur-3xl"></div>
@@ -96,22 +98,15 @@
                 </svg>
               </div>
               <span class="flex-1">Adoption Management</span>
+              @if(($pendingAdoptionsCount ?? 0) > 0)
+              <span class="px-2 py-0.5 text-xs font-bold bg-yellow-500 text-yellow-900 rounded-full">{{ $pendingAdoptionsCount }}</span>
+              @endif
               <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </a>
             @else
-            <a href="{{ (View::hasSection('hide-sidebar') || request()->query('hide_sidebar')) ? route('adoption.list', ['hide_image' => 1, 'hide_sidebar' => 1]) : route('adoption.list') }}" class="sidebar-link group {{ request()->routeIs('adoption.list') || request()->routeIs('adoption.form') ? 'active' : '' }} mb-3 block">
-              <div class="sidebar-icon-wrapper">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-              </div>
-              <span class="flex-1">Browse Adoptions</span>
-              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </a>
+            <!-- Browse Adoptions link removed for non-admin users per UX request -->
 
             <a href="{{ route('my.adoptions') }}" class="sidebar-link group {{ request()->routeIs('my.adoptions') ? 'active' : '' }} block">
               <div class="sidebar-icon-wrapper">
@@ -215,13 +210,13 @@
         </form>
       </div>
   </aside>
-  @endunless
+  @endif
 
     <!-- Main Content -->
-  <div class="flex-1 flex flex-col min-h-screen {{ $hideSidebar ? '' : 'lg:ml-72' }}">
-      <!-- Top Navbar -->
-  <header class="bg-gradient-to-r from-white via-purple-50 to-pink-50 backdrop-blur-sm shadow-lg border-b border-purple-100 fixed top-0 right-0 left-0 {{ $hideSidebar ? '' : 'lg:left-72' }} z-40">
-        <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+      <div class="flex-1 flex flex-col min-h-screen {{ isset($showSidebar) && $showSidebar ? 'lg:ml-72' : '' }}">
+        <!-- Top Navbar -->
+      <header class="bg-gradient-to-r from-white via-purple-50 to-pink-50 backdrop-blur-sm shadow-lg border-b border-purple-100 fixed top-0 right-0 left-0 z-40 h-16">
+        <div class="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
           <div class="flex items-center space-x-4">
             <!-- Mobile Menu Button -->
             <button id="openSidebar" class="lg:hidden p-2 text-purple-600 hover:text-purple-900 hover:bg-purple-100 rounded-xl transition-all duration-300 transform hover:scale-105">
@@ -308,12 +303,15 @@
 
                 <!-- Menu Items -->
                 <div class="py-1">
-                  <a href="/dashboard" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
+                  <!-- Profile link -->
+                  <a href="{{ route('profile') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Dashboard
+                    Profile
                   </a>
+
+                  <!-- Dashboard link removed from dropdown to avoid duplication with sidebar -->
 
                   @if(session('role') !== 'admin')
                   <a href="{{ route('my.adoptions') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
@@ -332,6 +330,37 @@
                   </a>
                 </div>
 
+                @php
+                  $adminRegistrationEnabled = \App\Models\Setting::get('admin_registration_enabled', '1') == '1';
+                @endphp
+
+                @if(session('role') === 'admin')
+                <div class="px-4 py-3">
+                  <form id="admin-toggle-form" action="{{ route('admin.settings.update') }}" method="POST" class="flex items-center justify-between">
+                    @csrf
+                    <div class="flex-1">
+                      <p class="text-sm font-medium text-gray-800">Allow Admin Registration</p>
+                      <p class="text-xs text-gray-500">Enable public admin signups</p>
+                    </div>
+                    <div class="ml-4">
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input id="admin_registration_enabled" type="checkbox" name="admin_registration_enabled" class="sr-only" {{ $adminRegistrationEnabled ? 'checked' : '' }}>
+                        <div class="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-purple-600 peer-checked:to-pink-600 transition-colors"></div>
+                        <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform" style="transform: translateX({{ $adminRegistrationEnabled ? '28px' : '0' }});"></span>
+                      </label>
+                    </div>
+                  </form>
+                </div>
+                <script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                    const cb = document.getElementById('admin_registration_enabled');
+                    cb?.addEventListener('change', function() {
+                      document.getElementById('admin-toggle-form').submit();
+                    });
+                  });
+                </script>
+                @endif
+
                 <div class="border-t border-gray-100 py-1">
                   <form action="{{ route('logout') }}" method="POST">
                     @csrf
@@ -345,12 +374,11 @@
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 p-4 sm:p-6 lg:p-8 mt-16">
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 mt-20">
         @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg animate-fade-in">
           <div class="flex items-center">

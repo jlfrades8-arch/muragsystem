@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Rescue;
 use App\Models\Adoption;
+use App\Models\Setting;
 
 class AuthController extends Controller
 {
@@ -54,6 +55,11 @@ class AuthController extends Controller
     // ===== REGISTER FOR ADMIN ===== 
     public function showRegisterAdmin()
     {
+        // Check if admin registration is allowed
+        $adminRegistrationEnabled = Setting::get('admin_registration_enabled', '1') == '1';
+        if (!$adminRegistrationEnabled) {
+            return redirect()->route('register')->with('error', 'Admin registration is currently disabled.');
+        }
         return view('register-admin');
     }
     // ===== HANDLE REGISTER USER ===== 
@@ -77,6 +83,12 @@ class AuthController extends Controller
     // ===== HANDLE REGISTER ADMIN ===== 
     public function registerAdmin(Request $request)
     {
+        // Check if admin registration is allowed
+        $adminRegistrationEnabled = Setting::get('admin_registration_enabled', '1') == '1';
+        if (!$adminRegistrationEnabled) {
+            return redirect()->route('register')->with('error', 'Admin registration is currently disabled.');
+        }
+
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
@@ -97,18 +109,45 @@ class AuthController extends Controller
     {
         $role = session('role');
         if ($role === 'admin') {
-            $pets = Rescue::orderBy('created_at', 'desc')->get();
-            $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue'])->count();
-            return view('admin-dashboard', compact('pets', 'pendingCount'));
+            // Eager-load adoptions to avoid N+1 queries
+            $pets = Rescue::with('adoptions')->orderBy('created_at', 'desc')->get();
+            
+            // Compute pending count and map pending adoptions to each rescue
+            $pendingCount = 0;
+            $pendingAdoptionsByRescueId = [];
+            
+            foreach ($pets as $pet) {
+                // Pending adoptions are those with null adopted_at
+                $pendingAdoptions = $pet->adoptions->filter(fn($adoption) => $adoption->adopted_at === null);
+                if ($pendingAdoptions->count() > 0) {
+                    $pendingCount += $pendingAdoptions->count();
+                    $pendingAdoptionsByRescueId[$pet->id] = $pendingAdoptions;
+                }
+            }
+            
+            return view('admin-dashboard', compact('pets', 'pendingCount', 'pendingAdoptionsByRescueId'));
         } elseif ($role === 'user') {
             // Show adoption list as the main user dashboard (pets ready for adoption)
-            $pets = Rescue::where('status', 'Ready for Adoption')->orderBy('created_at', 'desc')->get();
+            // Eager-load adoptions for pending check
+            $pets = Rescue::with('adoptions')
+                ->where('status', 'Ready for Adoption')
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            // Map pending adoptions for quick lookup in views
+            $pendingAdoptionsByRescueId = [];
+            foreach ($pets as $pet) {
+                $pendingAdoptions = $pet->adoptions->filter(fn($adoption) => $adoption->adopted_at === null);
+                if ($pendingAdoptions->count() > 0) {
+                    $pendingAdoptionsByRescueId[$pet->id] = $pendingAdoptions;
+                }
+            }
 
             // Get user's adoptions count
             $userEmail = session('user_email');
             $adoptionsCount = Adoption::where('adopter_email', $userEmail)->count();
 
-            return view('user-dashboard', compact('pets', 'adoptionsCount'));
+            return view('user-dashboard', compact('pets', 'adoptionsCount', 'pendingAdoptionsByRescueId'));
         } else {
             return redirect()->route('login');
         }
@@ -119,5 +158,43 @@ class AuthController extends Controller
     {
         Session::flush();
         return redirect()->route('login')->with('success', 'You have logged out.');
+    }
+
+    // ===== PROFILE PAGE =====
+    public function showProfile()
+    {
+        $user = User::where('email', session('user_email'))->first();
+        
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        return view('profile', compact('user'));
+    }
+
+    // ===== ADMIN SETTINGS PAGE =====
+    public function showAdminSettings()
+    {
+        // Only admins can access settings
+        if (session('role') !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
+        }
+
+        $adminRegistrationEnabled = Setting::get('admin_registration_enabled', '1') == '1';
+        return view('admin-settings', compact('adminRegistrationEnabled'));
+    }
+
+    // ===== UPDATE ADMIN SETTINGS =====
+    public function updateAdminSettings(Request $request)
+    {
+        // Only admins can update settings
+        if (session('role') !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
+        }
+
+        $adminRegistrationEnabled = $request->has('admin_registration_enabled') ? '1' : '0';
+        Setting::set('admin_registration_enabled', $adminRegistrationEnabled);
+
+        return redirect()->route('admin.settings')->with('success', 'Settings updated successfully!');
     }
 }

@@ -14,6 +14,7 @@ class Adoption extends Model
         'adopter_name',
         'adopter_email',
         'adopted_at',
+        'photo',
     ];
 
     public function rescue()

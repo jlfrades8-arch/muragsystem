@@ -53,12 +53,24 @@
                 <!-- Pet Details -->
                 <div class="p-6">
                     <div class="mb-6">
+                        @php
+                            $statusLabel = $pet->status ?? 'Pending';
+                        @endphp
+                        @if(isset($hasPendingAdoption) && $hasPendingAdoption)
+                        <div class="inline-flex items-center px-4 py-2 bg-yellow-400 text-yellow-900 rounded-xl shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                            </svg>
+                            <span class="font-bold text-sm">Pending for Adoption</span>
+                        </div>
+                        @else
                         <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg">
                             <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span class="text-white font-bold text-sm">Ready for Adoption</span>
+                            <span class="text-white font-bold text-sm">{{ $statusLabel }}</span>
                         </div>
+                        @endif
                     </div>
 
                     <div class="space-y-4">
@@ -100,15 +112,6 @@
                                 </p>
                             </div>
                         </div>
-
-                        @if($pet->condition)
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Condition</label>
-                            <div class="p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
-                                <p class="text-gray-700 text-sm">{{ $pet->condition }}</p>
-                            </div>
-                        </div>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -127,7 +130,7 @@
                     <p class="text-purple-100 text-sm mt-1">Please provide your information to adopt this pet</p>
                 </div>
 
-                <form action="{{ route('adoption.submit') }}" method="POST" class="p-6">
+                <form action="{{ route('adoption.submit') }}" method="POST" enctype="multipart/form-data" class="p-6">
                     @csrf
                     <input type="hidden" name="pet_id" value="{{ $pet->id }}">
 
@@ -206,23 +209,72 @@
                             </div>
                             <p class="mt-1 text-xs text-gray-500">This email is from your logged-in account</p>
                         </div>
+
+                        <!-- Photo/Image Upload -->
+                        <div>
+                            <label for="photo" class="block text-sm font-bold text-gray-700 mb-2">
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    Your Photo
+                                    <span class="text-red-500 ml-1">*</span>
+                                </span>
+                            </label>
+                            <div class="mt-2">
+                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all" id="photo-upload-area">
+                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    <p class="text-sm font-semibold text-gray-700">Click to upload or drag and drop</p>
+                                    <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                                </div>
+                                <input
+                                    type="file"
+                                    id="photo"
+                                    name="photo"
+                                    accept="image/*"
+                                    required
+                                    class="hidden"
+                                    onchange="updatePhotoPreview(this)">
+                                <div id="photo-preview" class="mt-3 hidden">
+                                    <img id="preview-img" src="" alt="Preview" class="w-full h-48 object-cover rounded-xl border-2 border-purple-300">
+                                    <button type="button" onclick="clearPhotoUpload()" class="mt-2 w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                        Remove Photo
+                                    </button>
+                                </div>
+                            </div>
+                            @error('photo')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     <!-- Submit Button -->
                     <div class="mt-8 flex gap-4">
-                        <button
-                            type="submit"
-                            class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">
-                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                            </svg>
-                            Submit Adoption Request
-                        </button>
-                        <a
-                            href="{{ route('adoption.list') }}"
-                            class="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md inline-flex items-center justify-center">
-                            Cancel
-                        </a>
+                        @if(isset($hasPendingAdoption) && $hasPendingAdoption)
+                            <div class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-yellow-400 text-yellow-900 font-bold rounded-xl transition-all shadow-lg text-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                                </svg>
+                                Pending — Someone has requested adoption
+                            </div>
+                            <a href="{{ route('adoption.list') }}" class="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md inline-flex items-center justify-center">Back to list</a>
+                        @else
+                            <button
+                                type="submit"
+                                class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                </svg>
+                                Submit Adoption Request
+                            </button>
+                            <a
+                                href="{{ route('adoption.list') }}"
+                                class="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md inline-flex items-center justify-center">
+                                Cancel
+                            </a>
+                        @endif
                     </div>
 
                     <!-- Additional Info -->
@@ -255,4 +307,53 @@
         </div>
     </div>
 </div>
+
+<script>
+    const photoUploadArea = document.getElementById('photo-upload-area');
+    const photoInput = document.getElementById('photo');
+    const photoPreview = document.getElementById('photo-preview');
+    const previewImg = document.getElementById('preview-img');
+
+    // Click to upload
+    photoUploadArea.addEventListener('click', () => photoInput.click());
+
+    // Drag and drop
+    photoUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        photoUploadArea.classList.add('border-purple-500', 'bg-purple-50');
+    });
+
+    photoUploadArea.addEventListener('dragleave', () => {
+        photoUploadArea.classList.remove('border-purple-500', 'bg-purple-50');
+    });
+
+    photoUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        photoUploadArea.classList.remove('border-purple-500', 'bg-purple-50');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            photoInput.files = files;
+            updatePhotoPreview(photoInput);
+        }
+    });
+
+    function updatePhotoPreview(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                photoPreview.classList.remove('hidden');
+                photoUploadArea.classList.add('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function clearPhotoUpload() {
+        photoInput.value = '';
+        photoPreview.classList.add('hidden');
+        photoUploadArea.classList.remove('hidden');
+    }
+</script>
 @endsection

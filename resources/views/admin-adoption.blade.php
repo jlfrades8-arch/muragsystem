@@ -15,11 +15,14 @@
             <img src="{{ asset('storage/' . $pet->image) }}"
                 alt="{{ $pet->pet_name ?? 'Pet' }} photo"
                 class="w-full h-64 object-cover transition-transform group-hover:scale-110 duration-300 pet-image-{{ $pet->id }}" />
-            <button type="button" class="change-photo-btn absolute top-3 right-3 bg-white/90 text-xs px-3 py-1 rounded-lg shadow-sm hover:bg-white transform transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center gap-2" data-pet-id="{{ $pet->id }}">
-                <svg class="w-3.5 h-3.5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l3-3h4l3 3h4v11a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6"></path></svg>
-                <span class="text-xs font-semibold">Change</span>
-            </button>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+            <label class="absolute top-3 right-3 inline-block m-0 p-0 z-30">
+                <input type="file" accept="image/*" class="upload-input-admin absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40" data-pet-id="{{ $pet->id }}">
+                <button type="button" class="change-photo-btn bg-white/90 text-xs px-3 py-1 rounded-lg shadow-sm hover:bg-white transform transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center gap-2 relative z-30" data-pet-id="{{ $pet->id }}">
+                    <svg class="w-3.5 h-3.5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l3-3h4l3 3h4v11a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6"></path></svg>
+                    <span class="text-xs font-semibold">Change</span>
+                </button>
+            </label>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                 <div class="absolute bottom-0 left-0 right-0 p-4">
                     <p class="text-white text-lg font-bold flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -29,7 +32,7 @@
                     </p>
                 </div>
             </div>
-            <input type="file" accept="image/*" class="hidden upload-input-admin" data-pet-id="{{ $pet->id }}">
+            <!-- removed duplicate hidden input to avoid event confusion; visible inputs are overlaid on buttons -->
         </div>
         @else
         <div class="bg-gradient-to-br from-gray-100 to-gray-200 h-64 flex items-center justify-center border-b-2 border-dashed border-gray-300">
@@ -40,8 +43,10 @@
                 <p class="text-gray-500 text-sm font-medium">{{ $pet->pet_name ?? 'Unnamed Pet' }}</p>
                 <p class="text-gray-400 text-xs mt-1">No photo available</p>
                 <div class="mt-3">
-                    <button type="button" class="change-photo-btn inline-flex items-center px-3 py-1.5 bg-white border border-gray-200 rounded text-sm font-semibold hover:bg-gray-50" data-pet-id="{{ $pet->id }}">Add Photo</button>
-        <input type="file" accept="image/*" class="hidden upload-input-admin" data-pet-id="{{ $pet->id }}">
+                    <label class="relative inline-block z-20">
+                        <input type="file" accept="image/*" class="upload-input-admin absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" data-pet-id="{{ $pet->id }}">
+                        <button type="button" class="change-photo-btn inline-flex items-center px-3 py-1.5 bg-white border border-gray-200 rounded text-sm font-semibold hover:bg-gray-50 relative z-20" data-pet-id="{{ $pet->id }}">Add Photo</button>
+                    </label>
                 </div>
             </div>
         </div>
@@ -104,7 +109,7 @@
                     </div>
                 </div>
             </div>
-
+    
             <!-- Status Button -->
             <!-- Status Button -->
             @php
@@ -112,24 +117,34 @@
             $raw = $pet->status ?? 'not yet rescue';
             $st = ($raw === 'Rescued') ? 'Rescued' : $raw;
 
+            // Check for any pending adoption requests for this rescue using precomputed data
+            $hasPendingAdoption = isset($pendingAdoptionsByRescueId[$pet->id]) && $pendingAdoptionsByRescueId[$pet->id]->count() > 0;
+
             // Determine button color and disabled state
             if ($st === 'Ready for Adoption') {
-                $statusColor = 'from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-green-500/30 hover:shadow-green-500/50';
-                $disabled = false;
+                    // If there is a pending adoption request, show as Pending for Adoption (admin needs to confirm)
+                    if ($hasPendingAdoption) {
+                        $st = 'Pending for Adoption';
+                        $statusColor = 'from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 shadow-yellow-400/30 hover:shadow-yellow-400/50 text-yellow-900';
+                        $disabled = false; // admin should be able to confirm adoption
+                    } else {
+                        $statusColor = 'from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-green-500/30 hover:shadow-green-500/50 text-white';
+                        $disabled = false;
+                    }
             } elseif ($st === 'Adopted') {
-                $statusColor = 'from-purple-500 to-pink-500 opacity-60 cursor-not-allowed';
+                $statusColor = 'from-purple-500 to-pink-500 opacity-60 cursor-not-allowed text-white';
                 $disabled = true;
             } elseif (strtolower($st) === 'not yet rescue') {
                 // Not yet rescued: visually muted and not clickable
                 $statusColor = 'from-gray-300 to-gray-400 text-gray-700 opacity-80 cursor-not-allowed';
                 $disabled = true;
             } else {
-                // Pending, Rescued, etc.
-                $statusColor = 'from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/30 hover:shadow-red-500/50';
+                // Rescued, Pending set above, etc.
+                $statusColor = 'from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/30 hover:shadow-red-500/50 text-white';
                 $disabled = false;
             }
             @endphp
-            <button type="button" class="status-btn w-full px-4 py-3 bg-gradient-to-r {{ $statusColor }} text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:scale-105 flex items-center justify-center" data-pet-id="{{ $pet->id }}" data-current-status="{{ $st }}" {{ $disabled ? 'disabled' : '' }}>
+            <button type="button" class="status-btn w-full px-4 py-3 bg-gradient-to-r {{ $statusColor }} text-sm font-bold rounded-xl transition-all shadow-lg hover:scale-105 flex items-center justify-center" data-pet-id="{{ $pet->id }}" data-current-status="{{ $st }}" data-has-pending="{{ $hasPendingAdoption ? '1' : '0' }}" {{ $disabled ? 'disabled' : '' }}>
                 @if($st === 'Ready for Adoption')
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -145,6 +160,14 @@
                 @endif
                 {{ $st }}
             </button>
+            @if($hasPendingAdoption)
+            <div class="mt-3 flex gap-2">
+                <button type="button" class="cancel-adoption-btn flex-1 px-3 py-2 bg-red-50 border border-red-200 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-100 transition-all" data-pet-id="{{ $pet->id }}">
+                    <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Cancel Adoption
+                </button>
+            </div>
+            @endif
         </div>
     </div>
     @empty
@@ -184,9 +207,16 @@
             const id = btn.dataset.petId;
             savePetName(id);
         }
+        // Cancel pending adoption (admin)
+        if (e.target.closest('.cancel-adoption-btn')) {
+            const btn = e.target.closest('.cancel-adoption-btn');
+            const id = btn.dataset.petId;
+            cancelAdoption(id, btn);
+        }
     });
 
     async function changeStatus(id, btn) {
+        if (!btn) { console.error('changeStatus called without btn for id', id); return; }
         // Normalize status text to handle capitalization differences
         let current = (btn.dataset.currentStatus || btn.innerText || '').toString().trim();
         const normalized = current.toLowerCase();
@@ -202,9 +232,18 @@
             return;
         }
 
-        // Allow admins to change from non-final states to Ready for Adoption
-        // (e.g., 'not yet rescue', 'pending', 'rescued', etc.)
-        if (!confirm('Change status to Ready for Adoption?')) return;
+        // Decide which status to send depending on whether there's a pending adoption
+        const hasPending = btn.dataset.hasPending === '1';
+        let desiredStatus = 'Ready for Adoption';
+        let confirmMessage = 'Change status to Ready for Adoption?';
+
+        // If there is a pending adoption, the admin action should be to confirm the adoption
+        if (hasPending) {
+            desiredStatus = 'Adopted';
+            confirmMessage = 'Confirm adoption and mark this pet as Adopted? (This will finalize the user request)';
+        }
+
+        if (!confirm(confirmMessage)) return;
 
         const token = '{{ csrf_token() }}';
         try {
@@ -215,52 +254,102 @@
                     'X-CSRF-TOKEN': token,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ status: 'Ready for Adoption' })
+                body: JSON.stringify({ status: desiredStatus })
             });
 
-            const data = await res.json();
-            if (data.success) {
-                const statusText = data.status || 'Ready for Adoption';
+            let data = null;
+            try {
+                data = await res.json();
+            } catch (parseErr) {
+                console.error('Failed to parse JSON response from status update', parseErr, await res.text());
+                showNotification('Unexpected server response', 'error');
+                return;
+            }
 
-                // Update button classes and content
-                btn.className = 'status-btn w-full mt-2 px-4 py-3 text-white text-sm font-bold rounded-lg transition-all';
+            if (res.ok && data && data.success) {
+                const statusText = data.status || desiredStatus || 'Ready for Adoption';
 
+                // keep dataset currentStatus in sync
+                btn.dataset.currentStatus = statusText;
+
+                // Update button classes and content (preserve base classes)
+                const base = 'status-btn w-full mt-2 px-4 py-3 text-white text-sm font-bold rounded-lg transition-all flex items-center justify-center';
                 if (statusText.toLowerCase() === 'ready for adoption') {
-                    btn.className += ' bg-green-500 hover:bg-green-600';
-                    btn.innerHTML = `
-                        <span class="flex items-center justify-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            ${statusText}
-                        </span>
-                    `;
+                    btn.className = base + ' bg-green-500 hover:bg-green-600';
+                    btn.innerHTML = `\n                        <span class="flex items-center justify-center">\n                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>\n                            </svg>\n                            ${statusText}\n                        </span>\n                    `;
                     btn.disabled = false;
                 } else if (statusText.toLowerCase() === 'adopted') {
-                    btn.className += ' bg-purple-500 opacity-50 cursor-not-allowed';
+                    btn.className = base + ' bg-purple-500 opacity-50 cursor-not-allowed';
                     btn.innerHTML = `<span class="flex items-center justify-center">${statusText}</span>`;
                     btn.disabled = true;
                 } else {
-                    // Other states (pending, not yet rescue, rescued)
-                    btn.className += ' bg-red-500 hover:bg-red-600';
-                    btn.innerHTML = `
-                        <span class="flex items-center justify-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            ${statusText}
-                        </span>
-                    `;
+                    btn.className = base + ' bg-red-500 hover:bg-red-600';
+                    btn.innerHTML = `\n                        <span class="flex items-center justify-center">\n                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>\n                            </svg>\n                            ${statusText}\n                        </span>\n                    `;
                     btn.disabled = false;
                 }
 
                 showNotification('Status updated successfully!', 'success');
             } else {
-                showNotification(data.message || 'Update failed', 'error');
+                console.error('Status update failed', res.status, data);
+                showNotification((data && data.message) || 'Update failed', 'error');
             }
         } catch (e) {
-            console.error(e);
+            console.error('Network error during status change', e);
             showNotification('Network error occurred', 'error');
+        }
+    }
+
+    async function cancelAdoption(id, btn) {
+        if (!confirm('Cancel pending adoption requests for this pet?')) return;
+        const token = document.querySelector('meta[name="csrf-token"]').content || '{{ csrf_token() }}';
+        try {
+            const res = await fetch('/admin/adoption/' + id + '/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await res.json().catch(() => null);
+            if (res.ok && data && data.success) {
+                // If controller returned HTML for the updated card, replace the card entirely
+                if (data && data.html) {
+                    try {
+                        const container = document.getElementById('pet-' + id);
+                        if (container) {
+                            container.outerHTML = data.html;
+                        }
+                    } catch (err) {
+                        console.error('Failed to replace card HTML', err);
+                    }
+                    showNotification('Pending adoption(s) canceled', 'success');
+                    return;
+                }
+
+                // Fallback: update UI pieces locally if no HTML returned
+                const statusBtn = document.querySelector('.status-btn[data-pet-id="' + id + '"]');
+                if (statusBtn) {
+                    statusBtn.dataset.hasPending = '0';
+                    statusBtn.dataset.currentStatus = data.status || 'Ready for Adoption';
+                    // change presentation to Ready for Adoption
+                    statusBtn.className = 'status-btn w-full mt-2 px-4 py-3 text-white text-sm font-bold rounded-lg transition-all flex items-center justify-center bg-green-500 hover:bg-green-600';
+                    statusBtn.innerHTML = `\n                        <span class="flex items-center justify-center">\n                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>\n                            </svg>\n                            Ready for Adoption\n                        </span>\n                    `;
+                    statusBtn.disabled = false;
+                }
+
+                // Remove cancel button
+                if (btn && btn.parentElement) {
+                    btn.parentElement.remove();
+                }
+
+                showNotification('Pending adoption(s) canceled', 'success');
+            } else {
+                showNotification((data && data.message) || 'Failed to cancel', 'error');
+            }
+        } catch (err) {
+            console.error('Cancel error', err);
+            showNotification('Network error during cancel', 'error');
         }
     }
 </script>

@@ -11,7 +11,7 @@ class AdminRescueController extends Controller
     public function index()
     {
         $pets = Rescue::orderBy('created_at', 'desc')->get();
-        $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue'])->count();
+        $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue', 'Pending for Adoption'])->count();
         return view('admin-reports', compact('pets', 'pendingCount'));
     }
 
@@ -21,7 +21,7 @@ class AdminRescueController extends Controller
         if (!$pet) return redirect()->route('admin.rescue.reports')->with('status', 'Pet not found');
 
         $pets = Rescue::orderBy('created_at', 'desc')->get();
-        $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue'])->count();
+        $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue', 'Pending for Adoption'])->count();
 
         return view('rescue-detail-admin', compact('pet', 'pets', 'pendingCount'));
     }
@@ -43,7 +43,21 @@ class AdminRescueController extends Controller
             }
             return redirect()->route('admin.rescue.reports')->with('status', 'Pet not found');
         }
-        $pet->update(['status' => $request->input('status')]);
+        $newStatus = $request->input('status');
+        $pet->update(['status' => $newStatus]);
+
+        // If admin marks the rescue as Adopted, mark the earliest pending adoption as adopted
+        if ($newStatus === 'Adopted') {
+            $adoption = \App\Models\Adoption::where('rescue_id', $pet->id)
+                ->whereNull('adopted_at')
+                ->orderBy('created_at', 'asc')
+                ->first();
+
+            if ($adoption) {
+                $adoption->adopted_at = now();
+                $adoption->save();
+            }
+        }
         // If this is an AJAX/JS request, return JSON so client can update without redirect
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json(['success' => true, 'status' => $pet->status]);

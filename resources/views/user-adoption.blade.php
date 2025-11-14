@@ -51,15 +51,21 @@
         <div class="md:w-80 h-64 md:h-auto bg-gradient-to-br from-purple-200 via-pink-200 to-rose-200 flex-shrink-0 relative overflow-hidden">
             @unless(request()->query('hide_image'))
                 @if(!empty($pet->image_url))
-                <img src="{{ $pet->image_url }}" alt="{{ $pet->pet_name ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" aria-label="View {{ $pet->pet_name ?? 'pet' }} details">
+                    <img src="{{ $pet->image_url }}" alt="{{ $pet->pet_name ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </a>
                 @elseif(!empty($pet->image))
-                <img src="{{ asset('storage/' . $pet->image) }}" alt="{{ $pet->pet_name ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" aria-label="View {{ $pet->pet_name ?? 'pet' }} details">
+                    <img src="{{ asset('storage/' . $pet->image) }}" alt="{{ $pet->pet_name ?? 'Pet' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </a>
                 @else
-                <div class="w-full h-full flex items-center justify-center">
-                    <svg class="w-24 h-24 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                </div>
+                <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" aria-label="View {{ $pet->pet_name ?? 'pet' }} details">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <svg class="w-24 h-24 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </div>
+                </a>
                 @endif
             @else
                 <!-- Image removed per user action (no <img> tag) -->
@@ -80,7 +86,9 @@
             <div class="flex items-start justify-between mb-6">
                 <div>
                     <h2 class="text-3xl font-black text-gray-900 mb-2">
-                        {{ $pet->pet_name ?? ($pet->full_name ? 'Pet of ' . $pet->full_name : 'Unnamed Pet') }}
+                        <a href="{{ route('adoption.form', ['id' => $pet->id, 'hide_sidebar' => 1]) }}" class="hover:underline">
+                            {{ $pet->pet_name ?? ($pet->full_name ? 'Pet of ' . $pet->full_name : 'Unnamed Pet') }}
+                        </a>
                     </h2>
                     <p class="text-sm text-gray-500 font-medium">
                         <span class="inline-flex items-center">

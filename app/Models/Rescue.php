@@ -47,4 +47,12 @@ class Rescue extends Model
 
         return asset('storage/' . $path);
     }
+
+    /**
+     * Relationship: A rescue can have multiple adoption requests.
+     */
+    public function adoptions()
+    {
+        return $this->hasMany(Adoption::class);
+    }
 }

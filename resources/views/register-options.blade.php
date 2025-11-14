@@ -39,7 +39,7 @@
     <h2>Choose Registration Type</h2>
     <button onclick="window.location.href='{{ route('register.user') }}'">Register as User</button>
     <button onclick="window.location.href='{{ route('register.admin') }}'">Register as Admin</button>
-    <button onclick="window.location.href='{{ route('login') }}'">Back to Login</button>
+  <button onclick="window.location.href='{{ route('dashboard') }}'">Back to Dashboard</button>
   </div>
 </body>
 </html>
