@@ -131,6 +131,18 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </a>
+            <!-- Quick access to My Feedbacks for non-admin users -->
+            <a href="{{ route('feedback.index') }}" class="sidebar-link group {{ request()->routeIs('feedback.index') ? 'active' : '' }} block">
+              <div class="sidebar-icon-wrapper bg-gradient-to-br from-pink-400 to-pink-500">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8s-9-3.582-9-8 4.03-8 9-8 9 3.582 9 8z" />
+                </svg>
+              </div>
+              <span class="flex-1">My Feedbacks</span>
+              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
             @endif
           </div>
         </div>
