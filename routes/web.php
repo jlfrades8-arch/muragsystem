@@ -17,6 +17,12 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
+// Password reset routes
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
 // Registration selection and forms
 Route::get('/register', [AuthController::class, 'showRegisterSelect'])->name('register');
 Route::get('/register/user', [AuthController::class, 'showRegisterUser'])->name('register.user');
@@ -29,6 +35,7 @@ Route::post('/register/admin', [AuthController::class, 'registerAdmin'])->name('
 Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
 Route::get('/user/dashboard', [AuthController::class, 'showDashboard'])->name('user.dashboard');
 Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
+Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
 Route::post('/profile/upload-picture', [AuthController::class, 'uploadProfilePicture'])->name('profile.upload');
 Route::delete('/profile/delete-picture', [AuthController::class, 'deleteProfilePicture'])->name('profile.delete-picture');
 // Allow both GET and POST for logout so views that POST (with CSRF) work and GET links still function.
@@ -73,8 +80,10 @@ Route::delete('/admin/users/{id}', [AuthController::class, 'destroyUser'])->name
 // Feedback routes (public + admin)
 Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
 Route::get('/feedback/{id}', [FeedbackController::class, 'show'])->name('feedback.show');
-// My feedbacks - list feedbacks submitted by the current logged-in user (or matched by email)
+// Community feedbacks - all users can see all feedbacks
 Route::get('/feedbacks', [FeedbackController::class, 'userIndex'])->name('feedback.index');
+// My feedbacks - list feedbacks submitted by the current logged-in user only
+Route::get('/my-feedbacks', [FeedbackController::class, 'myFeedbacks'])->name('feedback.my');
 Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
 Route::get('/admin/feedbacks', [FeedbackController::class, 'index'])->name('admin.feedbacks');
 Route::get('/admin/feedbacks/{id}', [FeedbackController::class, 'show'])->name('admin.feedbacks.show');

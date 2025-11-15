@@ -1,17 +1,17 @@
 @extends('layouts.admin')
 
-@section('title', 'Community Feedbacks')
-@section('page-title', 'Community Feedbacks')
-@section('page-subtitle', 'View feedback from all users and admin replies')
+@section('title', 'My Feedbacks')
+@section('page-title', 'My Feedbacks')
+@section('page-subtitle', 'Your submitted feedback and replies')
 
 @section('content')
 <div class="max-w-4xl mx-auto">
   <div class="bg-white p-6 rounded-lg shadow">
     <div class="flex justify-between items-center mb-6">
-      <h3 class="text-lg font-bold">Community Feedbacks</h3>
+      <h3 class="text-lg font-bold">My Feedbacks</h3>
       <div class="flex gap-2">
-        <a href="{{ route('feedback.my') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
-          My Feedbacks
+        <a href="{{ route('feedback.index') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+          Community Feedbacks
         </a>
         <a href="{{ route('feedback.create') }}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium">
           Submit Feedback
@@ -37,10 +37,10 @@
             <div class="mt-4 bg-gray-50 p-3 rounded border-l-4 border-indigo-200">
               <h4 class="font-semibold text-sm text-indigo-700 mb-2">Replies</h4>
               @foreach($fb->replies as $reply)
-              <div class="mb-3">
+              <div class="mb-3 last:mb-0">
                 <p class="text-sm font-semibold text-indigo-700">{{ $reply->admin?->name ?? 'Admin' }}</p>
                 <p class="text-xs text-gray-500">{{ $reply->created_at->format('M d, Y H:i') }}</p>
-                <p class="text-gray-800 mt-1">{{ $reply->message }}</p>
+                <p class="text-gray-800 mt-1 text-sm">{{ $reply->message }}</p>
               </div>
               @endforeach
             </div>
@@ -60,7 +60,7 @@
       @endforeach
     </div>
     @else
-    <p class="text-gray-500 text-center py-8">No feedback has been submitted yet. Be the first to share your thoughts!</p>
+    <p class="text-gray-500 text-center py-8">You haven't submitted any feedback yet. <a href="{{ route('feedback.create') }}" class="text-purple-600 hover:underline">Submit your first feedback</a>!</p>
     @endif
   </div>
 </div>

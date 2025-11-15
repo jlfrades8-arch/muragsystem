@@ -58,8 +58,10 @@ class AdoptionController extends Controller
         $validated = $request->validate([
             'pet_id' => 'required',
             'adopter_name' => 'required|string',
-            'contact' => 'required|string',
+            'contact' => ['required', 'string', 'regex:/^(09|\+639)\d{9}$/'],
             // 'photo' removed
+        ], [
+            'contact.regex' => 'Please enter a valid Philippine mobile number (e.g., 09171234567 or +639171234567)'
         ]);
 
         // Persist adoption by marking the rescue record as Adopted

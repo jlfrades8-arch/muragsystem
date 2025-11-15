@@ -98,7 +98,8 @@
                                 <label for="full_name" class="block text-sm font-bold text-gray-700 mb-2">
                                     Full Name <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" id="full_name" name="pets[{{ $startIndex }}][full_name]" required
+                                <input type="text" id="full_name" name="pets[{{ $startIndex }}][full_name]"
+                                    value="{{ old('pets.' . $startIndex . '.full_name', session('user_name', '')) }}" required
                                     class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 font-medium"
                                     placeholder="Enter your full name">
                             </div>
@@ -113,10 +114,13 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                                         </svg>
                                     </div>
-                                    <input type="tel" id="contact" name="pets[{{ $startIndex }}][contact]" required
+                                    <input type="tel" id="contact" name="pets[{{ $startIndex }}][contact]"
+                                        value="{{ old('pets.' . $startIndex . '.contact') }}" required
+                                        pattern="^(09|\+639)\d{9}$"
                                         class="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 font-medium"
-                                        placeholder="e.g., 09123456789">
+                                        placeholder="e.g., 09171234567 or +639171234567">
                                 </div>
+                                <p class="mt-1 text-xs text-gray-500 ml-12">Philippine mobile number format</p>
                             </div>
                         </div>
                     </div>
@@ -138,7 +142,7 @@
                                 </label>
                                 <select id="address" name="pets[{{ $startIndex }}][address]" required
                                     class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-gray-900 font-medium">
-                                    <option value=""></option>     
+                                    <option value=""></option>
                                     <option value="Banlasan, Trinidad, Bohol">Banlasan, Trinidad, Bohol</option>
                                     <option value="Bongbong, Trinidad, Bohol">Bongbong, Trinidad, Bohol</option>
                                     <option value="Catoogan, Trinidad, Bohol">Catoogan, Trinidad, Bohol</option>
