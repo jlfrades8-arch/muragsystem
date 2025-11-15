@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Rescue;
 use App\Models\Adoption;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -189,12 +190,143 @@ class AuthController extends Controller
     {
         // Only admins can update settings
         if (session('role') !== 'admin') {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'error' => 'Unauthorized access.'], 403);
+            }
             return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
         }
 
+        // Handle toggle from dropdown button
+        if ($request->has('toggle')) {
+            $currentValue = Setting::get('admin_registration_enabled', '1');
+            $newValue = $currentValue == '1' ? '0' : '1';
+            Setting::set('admin_registration_enabled', $newValue);
+            
+            return response()->json(['success' => true, 'enabled' => $newValue == '1']);
+        }
+
+        // Handle form submission (legacy for admin-settings page)
         $adminRegistrationEnabled = $request->has('admin_registration_enabled') ? '1' : '0';
         Setting::set('admin_registration_enabled', $adminRegistrationEnabled);
 
         return redirect()->route('admin.settings')->with('success', 'Settings updated successfully!');
     }
+
+    // ===== UPLOAD PROFILE PICTURE =====
+    public function uploadProfilePicture(Request $request)
+    {
+        $user = User::where('email', session('user_email'))->first();
+        
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $request->validate([
+            'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Delete old picture if exists
+        if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+            Storage::disk('public')->delete($user->profile_picture);
+        }
+
+        // Store new picture
+        $path = $request->file('profile_picture')->store('profile-pictures', 'public');
+        
+        // Update user
+        $user->update(['profile_picture' => $path]);
+
+        return redirect()->route('profile')->with('success', 'Profile picture updated successfully!');
+    }
+
+    // ===== DELETE PROFILE PICTURE =====
+    public function deleteProfilePicture(Request $request)
+    {
+        $user = User::where('email', session('user_email'))->first();
+        
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Delete file if exists
+        if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+            Storage::disk('public')->delete($user->profile_picture);
+        }
+
+        // Clear profile picture field
+        $user->update(['profile_picture' => null]);
+
+        return redirect()->route('profile')->with('success', 'Profile picture removed successfully!');
+    }
+
+    // ===== SHOW ALL USERS (ADMIN ONLY) =====
+    public function showUsers()
+    {
+        // Only admins can access user list
+        if (session('role') !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
+        }
+
+        // Get only regular users (exclude admins)
+        $users = User::where('role', 'user')->orderBy('created_at', 'desc')->get();
+        
+        return view('admin-users', compact('users'));
+    }
+
+    // ===== SHOW USER PROFILE (ADMIN ONLY) =====
+    public function showUserProfile($id)
+    {
+        // Only admins can access user profiles
+        if (session('role') !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
+        }
+
+        $user = User::find($id);
+        
+        if (!$user || $user->role !== 'user') {
+            return redirect()->route('admin.users')->with('error', 'User not found.');
+        }
+
+        // Get user's adoptions
+        $adoptions = Adoption::where('adopter_email', $user->email)->orderBy('created_at', 'desc')->get();
+        
+        return view('admin-user-profile', compact('user', 'adoptions'));
+    }
+
+    // ===== DELETE USER (ADMIN ONLY) =====
+    public function destroyUser($id)
+    {
+        // Only admins can delete users
+        if (session('role') !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
+        }
+
+        $user = User::find($id);
+
+        if (!$user || $user->role !== 'user') {
+            return redirect()->route('admin.users')->with('error', 'User not found or cannot be deleted.');
+        }
+
+        // Prevent deleting the currently logged-in admin by accident
+        if ($user->id === session('user_id')) {
+            return redirect()->route('admin.users')->with('error', 'You cannot delete your own account.');
+        }
+
+        // (Audit log removed) Proceed to delete user
+
+        // Remove profile picture file if present
+        if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+            Storage::disk('public')->delete($user->profile_picture);
+        }
+
+        // Optionally remove adoptions tied to this user (by email)
+        Adoption::where('adopter_email', $user->email)->delete();
+
+        // Finally delete the user
+        $user->delete();
+
+        return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
+    }
+
+    
 }

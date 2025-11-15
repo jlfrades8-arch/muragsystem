@@ -25,7 +25,9 @@ class AdminAdoptionController extends Controller
             }
         }
         
-        return view('admin-adoption', compact('pets', 'pendingAdoptionsByRescueId'));
+        $adoptionsCount = Adoption::whereNotNull('adopted_at')->count();
+        
+        return view('admin-adoption', compact('pets', 'pendingAdoptionsByRescueId', 'adoptionsCount'));
     }
 
     /**

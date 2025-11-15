@@ -10,9 +10,13 @@
         <!-- Header -->
         <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 px-6 py-8">
             <div class="flex items-center space-x-4">
+                @if($user->profile_picture)
+                <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="{{ $user->name }}" class="w-16 h-16 rounded-full object-cover shadow-lg border-4 border-white">
+                @else
                 <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center font-bold text-2xl shadow-lg">
                     <span class="text-purple-600">{{ strtoupper(substr($user->email, 0, 1)) }}</span>
                 </div>
+                @endif
                 <div>
                     <h1 class="text-2xl font-bold text-white">{{ $user->name ?? 'User' }}</h1>
                     <p class="text-purple-100">{{ $user->role === 'admin' ? 'Administrator' : 'Regular User' }}</p>
@@ -22,6 +26,50 @@
 
         <!-- Profile Information -->
         <div class="p-6 space-y-6">
+            <!-- Profile Picture Upload -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-3">Profile Picture</label>
+                <div class="flex flex-col sm:flex-row gap-6">
+                    <div class="flex-shrink-0">
+                        @if($user->profile_picture)
+                        <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="{{ $user->name }}" class="w-24 h-24 rounded-xl object-cover shadow-lg border-2 border-gray-200">
+                        @else
+                        <div class="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="flex-1">
+                        <form id="profile-picture-form" action="{{ route('profile.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                            @csrf
+                            <div class="relative">
+                                <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="hidden" onchange="document.getElementById('profile-picture-form').submit()">
+                                <label for="profile_picture" class="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl cursor-pointer transition-all shadow-md hover:shadow-lg transform hover:scale-105">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    {{ $user->profile_picture ? 'Change Photo' : 'Add Photo' }}
+                                </label>
+                            </div>
+                            @if($user->profile_picture)
+                            <button type="button" onclick="confirmDelete()" class="w-full px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-xl border-2 border-red-200 transition-colors">
+                                Remove Picture
+                            </button>
+                            <form id="delete-picture-form" action="{{ route('profile.delete-picture') }}" method="POST" class="hidden">
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                            @endif
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="border-t border-gray-200"></div>
+
             <!-- Full Name -->
             <div>
                 <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Full Name</label>
@@ -81,4 +129,12 @@
         </div>
     </div>
 </div>
+
+<script>
+function confirmDelete() {
+    if (confirm('Are you sure you want to remove your profile picture?')) {
+        document.getElementById('delete-picture-form').submit();
+    }
+}
+</script>
 @endsection

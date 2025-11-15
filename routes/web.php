@@ -6,6 +6,7 @@ use App\Http\Controllers\RescueController;
 use App\Http\Controllers\AdoptionController;
 use App\Http\Controllers\AdminAdoptionController;
 use App\Http\Controllers\AdminRescueController;
+use App\Http\Controllers\FeedbackController;
 
 // Welcome page
 Route::get('/', function () {
@@ -28,6 +29,8 @@ Route::post('/register/admin', [AuthController::class, 'registerAdmin'])->name('
 Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
 Route::get('/user/dashboard', [AuthController::class, 'showDashboard'])->name('user.dashboard');
 Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
+Route::post('/profile/upload-picture', [AuthController::class, 'uploadProfilePicture'])->name('profile.upload');
+Route::delete('/profile/delete-picture', [AuthController::class, 'deleteProfilePicture'])->name('profile.delete-picture');
 // Allow both GET and POST for logout so views that POST (with CSRF) work and GET links still function.
 Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -61,3 +64,19 @@ Route::post('/admin/rescue/{id}/update-pet-name', [AdminRescueController::class,
 // Admin settings
 Route::get('/admin/settings', [AuthController::class, 'showAdminSettings'])->name('admin.settings');
 Route::post('/admin/settings', [AuthController::class, 'updateAdminSettings'])->name('admin.settings.update');
+
+// Admin users
+Route::get('/admin/users', [AuthController::class, 'showUsers'])->name('admin.users');
+Route::get('/admin/users/{id}', [AuthController::class, 'showUserProfile'])->name('admin.user.profile');
+Route::delete('/admin/users/{id}', [AuthController::class, 'destroyUser'])->name('admin.user.destroy');
+
+// Feedback routes (public + admin)
+Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
+Route::get('/feedback/{id}', [FeedbackController::class, 'show'])->name('feedback.show');
+// My feedbacks - list feedbacks submitted by the current logged-in user (or matched by email)
+Route::get('/feedbacks', [FeedbackController::class, 'userIndex'])->name('feedback.index');
+Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+Route::get('/admin/feedbacks', [FeedbackController::class, 'index'])->name('admin.feedbacks');
+Route::get('/admin/feedbacks/{id}', [FeedbackController::class, 'show'])->name('admin.feedbacks.show');
+Route::post('/admin/feedbacks/{id}/reply', [FeedbackController::class, 'storeReply'])->name('admin.feedbacks.reply');
+Route::post('/admin/feedbacks/{id}/close', [FeedbackController::class, 'close'])->name('admin.feedbacks.close');

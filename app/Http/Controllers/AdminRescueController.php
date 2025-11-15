@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Rescue;
+use App\Models\Adoption;
 use Illuminate\Support\Facades\Storage;
 
 class AdminRescueController extends Controller
@@ -12,7 +13,8 @@ class AdminRescueController extends Controller
     {
         $pets = Rescue::orderBy('created_at', 'desc')->get();
         $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue', 'Pending for Adoption'])->count();
-        return view('admin-reports', compact('pets', 'pendingCount'));
+        $adoptionsCount = Adoption::whereNotNull('adopted_at')->count();
+        return view('admin-reports', compact('pets', 'pendingCount', 'adoptionsCount'));
     }
 
     public function show($id)
@@ -22,8 +24,9 @@ class AdminRescueController extends Controller
 
         $pets = Rescue::orderBy('created_at', 'desc')->get();
         $pendingCount = $pets->whereIn('status', ['Pending', 'not yet rescue', 'Pending for Adoption'])->count();
+        $adoptionsCount = Adoption::whereNotNull('adopted_at')->count();
 
-        return view('rescue-detail-admin', compact('pet', 'pets', 'pendingCount'));
+        return view('rescue-detail-admin', compact('pet', 'pets', 'pendingCount', 'adoptionsCount'));
     }
 
     public function updateStatus(Request $request, $id)

@@ -59,7 +59,7 @@ class AdoptionController extends Controller
             'pet_id' => 'required',
             'adopter_name' => 'required|string',
             'contact' => 'required|string',
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            // 'photo' removed
         ]);
 
         // Persist adoption by marking the rescue record as Adopted
@@ -76,7 +76,7 @@ class AdoptionController extends Controller
             return redirect()->route('adoption.list')->with('error', 'This pet already has a pending adoption request.');
         }
 
-        // Store the uploaded photo
+        // Store the uploaded photo if present
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('adoptions', 'public');

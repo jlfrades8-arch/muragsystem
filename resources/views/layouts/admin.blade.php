@@ -105,6 +105,18 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </a>
+
+            <a href="{{ route('admin.users') }}" class="sidebar-link group {{ request()->routeIs('admin.users') ? 'active' : '' }} mb-3 block">
+              <div class="sidebar-icon-wrapper">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.048 4 4 0 010-8.048M12 14H8m4 0h4m-2-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <span class="flex-1">Users</span>
+              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
             @else
             <!-- Browse Adoptions link removed for non-admin users per UX request -->
 
@@ -154,6 +166,10 @@
         </div>
         <!-- Stats Card (Inside Nav) -->
         <div class="mt-2.5">
+          @php
+            $totalRescues = \App\Models\Rescue::count();
+            $totalAdopted = \App\Models\Adoption::whereNotNull('adopted_at')->count();
+          @endphp
           <div class="p-3 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-lg border border-white/10 transition-all duration-300">
             <div class="flex items-center justify-between mb-1.5">
               <p class="text-sm font-semibold text-purple-200 flex items-center">
@@ -161,25 +177,14 @@
               </p>
             </div>
             <div class="space-y-1.5">
-              @if(session('role') === 'admin')
               <div class="flex items-center justify-between py-1">
                 <span class="text-sm text-purple-200">Total</span>
-                <span class="text-sm font-bold text-white">{{ isset($pets) ? $pets->count() : 0 }}</span>
+                <span class="text-sm font-bold text-white">{{ $totalRescues }}</span>
               </div>
               <div class="flex items-center justify-between py-1">
                 <span class="text-sm text-purple-200">Adopted</span>
-                <span class="text-sm font-bold text-green-400">{{ isset($pets) ? $pets->where('status', 'Adopted')->count() : 0 }}</span>
+                <span class="text-sm font-bold text-green-400">{{ $totalAdopted }}</span>
               </div>
-              @else
-              <div class="flex items-center justify-between py-1">
-                <span class="text-sm text-purple-200">Available</span>
-                <span class="text-sm font-bold text-white">{{ isset($pets) ? $pets->count() : 0 }}</span>
-              </div>
-              <div class="flex items-center justify-between py-1">
-                <span class="text-sm text-purple-200">My Adoptions</span>
-                <span class="text-sm font-bold text-green-400">{{ $adoptionsCount ?? 0 }}</span>
-              </div>
-              @endif
             </div>
           </div>
         </div>
@@ -252,23 +257,38 @@
             </button>
 
             <!-- Notifications -->
-            <button class="relative p-2.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-300 group">
-              <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('feedback.create') }}" class="relative p-2.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-300 group">
+              <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
               </svg>
+              @php
+                $openFeedbacks = 0;
+                if (session('role') === 'admin') {
+                  $openFeedbacks = \App\Models\Feedback::where('status','open')->count();
+                }
+              @endphp
+              @if($openFeedbacks > 0)
               <span class="absolute top-1 right-1 flex h-3 w-3">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-pink-500 border-2 border-white"></span>
               </span>
-            </button>
+              @endif
+            </a>
 
             <!-- User Avatar & Info (Desktop) with Dropdown -->
             <div class="hidden sm:block relative" x-data="{ open: false }">
               <button @click="open = !open" class="flex items-center space-x-3 px-3 py-2 bg-white hover:bg-purple-50 rounded-xl border border-gray-200 hover:border-purple-200 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md">
                 <div class="relative">
-                  <div class="w-9 h-9 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-xl flex items-center justify-center font-bold text-white text-sm shadow-lg transform group-hover:scale-105 transition-transform">
-                    {{ strtoupper(substr(session('user_email', 'A'), 0, 1)) }}
-                  </div>
+                  @php
+                    $userForProfile = \App\Models\User::where('email', session('user_email'))->first();
+                  @endphp
+                  @if($userForProfile && $userForProfile->profile_picture)
+                    <img src="{{ asset('storage/' . $userForProfile->profile_picture) }}" alt="{{ session('user_email') }}" class="w-9 h-9 rounded-xl object-cover shadow-lg transform group-hover:scale-105 transition-transform">
+                  @else
+                    <div class="w-9 h-9 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-xl flex items-center justify-center font-bold text-white text-sm shadow-lg transform group-hover:scale-105 transition-transform">
+                      {{ strtoupper(substr(session('user_email', 'A'), 0, 1)) }}
+                    </div>
+                  @endif
                   <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
                 </div>
                 <div class="hidden lg:block">
@@ -294,9 +314,23 @@
 
                 <!-- User Info Header -->
                 <div class="px-4 py-3 border-b border-gray-100">
-                  <p class="text-sm font-semibold text-gray-800">{{ session('user_name', session('user_email')) }}</p>
-                  <p class="text-xs text-gray-500 truncate">{{ session('user_email') }}</p>
-                  <span class="inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded-full {{ session('role') === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                  <div class="flex items-center space-x-3 mb-2">
+                    <div class="relative">
+                      @if($userForProfile && $userForProfile->profile_picture)
+                        <img src="{{ asset('storage/' . $userForProfile->profile_picture) }}" alt="{{ session('user_email') }}" class="w-10 h-10 rounded-lg object-cover shadow-md">
+                      @else
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-md">
+                          {{ strtoupper(substr(session('user_email', 'A'), 0, 1)) }}
+                        </div>
+                      @endif
+                      <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white"></div>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold text-gray-800">{{ session('user_name', session('user_email')) }}</p>
+                      <p class="text-xs text-gray-500 truncate">{{ session('user_email') }}</p>
+                    </div>
+                  </div>
+                  <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full {{ session('role') === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
                     {{ session('role') === 'admin' ? 'Administrator' : 'Regular User' }}
                   </span>
                 </div>
@@ -320,6 +354,13 @@
                     </svg>
                     My Adoptions
                   </a>
+                  <!-- My Feedbacks link for users -->
+                  <a href="{{ route('feedback.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8s-9-3.582-9-8 4.03-8 9-8 9 3.582 9 8z" />
+                    </svg>
+                    My Feedbacks
+                  </a>
                   @endif
 
                   <a href="{{ route('rescue.form') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
@@ -335,28 +376,54 @@
                 @endphp
 
                 @if(session('role') === 'admin')
-                <div class="px-4 py-3">
-                  <form id="admin-toggle-form" action="{{ route('admin.settings.update') }}" method="POST" class="flex items-center justify-between">
+                <div class="border-t border-gray-100 py-1">
+                  <form id="admin-toggle-form" action="{{ route('admin.settings.update') }}" method="POST">
                     @csrf
-                    <div class="flex-1">
-                      <p class="text-sm font-medium text-gray-800">Allow Admin Registration</p>
-                      <p class="text-xs text-gray-500">Enable public admin signups</p>
-                    </div>
-                    <div class="ml-4">
-                      <label class="relative inline-flex items-center cursor-pointer">
-                        <input id="admin_registration_enabled" type="checkbox" name="admin_registration_enabled" class="sr-only" {{ $adminRegistrationEnabled ? 'checked' : '' }}>
-                        <div class="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-gradient-to-r peer-checked:from-purple-600 peer-checked:to-pink-600 transition-colors"></div>
-                        <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform" style="transform: translateX({{ $adminRegistrationEnabled ? '28px' : '0' }});"></span>
-                      </label>
-                    </div>
+                    <button type="submit" class="flex items-center w-full px-4 py-2 text-sm {{ $adminRegistrationEnabled ? 'text-purple-600 hover:bg-purple-50' : 'text-orange-600 hover:bg-orange-50' }} transition-colors">
+                      <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5-4a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                      </svg>
+                      <span class="flex-1">{{ $adminRegistrationEnabled ? 'Allow Admin Registration' : 'Block Admin Registration' }}</span>
+                      <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full {{ $adminRegistrationEnabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                        {{ $adminRegistrationEnabled ? 'ON' : 'OFF' }}
+                      </span>
+                    </button>
                   </form>
                 </div>
                 <script>
                   document.addEventListener('DOMContentLoaded', function() {
-                    const cb = document.getElementById('admin_registration_enabled');
-                    cb?.addEventListener('change', function() {
-                      document.getElementById('admin-toggle-form').submit();
-                    });
+                    const form = document.getElementById('admin-toggle-form');
+                    if (form) {
+                      form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        // Add loading state
+                        const btn = form.querySelector('button');
+                        const originalText = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.style.opacity = '0.6';
+                        
+                        fetch(form.action, {
+                          method: 'POST',
+                          headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                          },
+                          body: 'toggle=1'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                          if (data.success) {
+                            // Reload page to reflect changes
+                            window.location.reload();
+                          }
+                        })
+                        .catch(error => {
+                          btn.disabled = false;
+                          btn.style.opacity = '1';
+                          console.error('Error:', error);
+                        });
+                      });
+                    }
                   });
                 </script>
                 @endif
@@ -451,6 +518,27 @@
       });
     });
   </script>
+
+  <!-- Floating Feedback Button (accessible site-wide) -->
+  @php
+    $openFeedbacksFloating = 0;
+    try {
+      $openFeedbacksFloating = \App\Models\Feedback::where('status','open')->count();
+    } catch (\Exception $e) {
+      $openFeedbacksFloating = 0;
+    }
+  @endphp
+
+  <a href="{{ route('feedback.create') }}" title="Send Feedback"
+     class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition transform hover:scale-105">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10l4-4h10a2 2 0 002-2v0"></path>
+    </svg>
+    <span class="hidden sm:inline font-semibold">Feedback</span>
+    @if($openFeedbacksFloating > 0)
+      <span class="ml-2 inline-flex items-center justify-center h-3 w-3 rounded-full bg-white text-pink-600 text-xs font-bold shadow-md"></span>
+    @endif
+  </a>
 
   @stack('scripts')
 
