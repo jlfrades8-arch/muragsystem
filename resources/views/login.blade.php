@@ -10,7 +10,7 @@
 
 <body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-    <!-- Logo/Header -->
+        <!-- Logo/Header -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-20 h-20 mb-4 shadow-lg">
                 <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
@@ -83,7 +83,12 @@
 
                 <!-- Password Field -->
                 <div>
-                    <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
+                        <a href="{{ route('password.request') }}" class="text-sm font-semibold text-purple-600 hover:text-purple-700 hover:underline">
+                            Forgot Password?
+                        </a>
+                    </div>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -10,6 +10,9 @@ use App\Models\Rescue;
 use App\Models\Adoption;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -33,7 +36,7 @@ class AuthController extends Controller
         }
 
         // store minimal session info (this app uses session for simple auth)
-        session(['role' => $user->role, 'user_email' => $user->email, 'user_id' => $user->id]);
+        session(['role' => $user->role, 'user_email' => $user->email, 'user_id' => $user->id, 'user_name' => $user->name]);
 
         // Ensure admins land on the admin dashboard first
         if ($user->role === 'admin') {
@@ -112,11 +115,11 @@ class AuthController extends Controller
         if ($role === 'admin') {
             // Eager-load adoptions to avoid N+1 queries
             $pets = Rescue::with('adoptions')->orderBy('created_at', 'desc')->get();
-            
+
             // Compute pending count and map pending adoptions to each rescue
             $pendingCount = 0;
             $pendingAdoptionsByRescueId = [];
-            
+
             foreach ($pets as $pet) {
                 // Pending adoptions are those with null adopted_at
                 $pendingAdoptions = $pet->adoptions->filter(fn($adoption) => $adoption->adopted_at === null);
@@ -125,7 +128,7 @@ class AuthController extends Controller
                     $pendingAdoptionsByRescueId[$pet->id] = $pendingAdoptions;
                 }
             }
-            
+
             return view('admin-dashboard', compact('pets', 'pendingCount', 'pendingAdoptionsByRescueId'));
         } elseif ($role === 'user') {
             // Show adoption list as the main user dashboard (pets ready for adoption)
@@ -134,7 +137,7 @@ class AuthController extends Controller
                 ->where('status', 'Ready for Adoption')
                 ->orderBy('created_at', 'desc')
                 ->get();
-            
+
             // Map pending adoptions for quick lookup in views
             $pendingAdoptionsByRescueId = [];
             foreach ($pets as $pet) {
@@ -158,19 +161,147 @@ class AuthController extends Controller
     public function logout()
     {
         Session::flush();
-        return redirect()->route('login')->with('success', 'You have logged out.');
+        return redirect()->route('login')->with('success', 'Logged out successfully!');
+    }
+
+    // ===== SHOW FORGOT PASSWORD =====
+    public function showForgotPassword()
+    {
+        return view('forgot-password');
+    }
+
+    // ===== SEND RESET LINK =====
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->with('error', 'We could not find a user with that email address.');
+        }
+
+        // Delete old tokens
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        // Create new token
+        $token = Str::random(60);
+        DB::table('password_reset_tokens')->insert([
+            'email' => $request->email,
+            'token' => Hash::make($token),
+            'created_at' => now(),
+        ]);
+
+        // Generate reset URL
+        $resetUrl = route('password.reset', ['token' => $token]) . '?email=' . urlencode($request->email);
+
+        // Send email
+        try {
+            Mail::send('emails.password-reset', ['resetUrl' => $resetUrl], function ($message) use ($request) {
+                $message->to($request->email)
+                    ->subject('Reset Your Password - Pet Adoption System');
+            });
+
+            return back()->with('status', 'We have emailed your password reset link! Please check your email inbox or spam folder.');
+        } catch (\Exception $e) {
+            // If email fails, still show the link for development
+            return back()->with('status', 'Password reset link generated. In development mode, check your log file or use this link: ' . $resetUrl);
+        }
+    }
+
+    // ===== SHOW RESET PASSWORD =====
+    public function showResetPassword(Request $request, $token)
+    {
+        return view('reset-password', ['token' => $token, 'email' => $request->email]);
+    }
+
+    // ===== RESET PASSWORD =====
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $resetRecord = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$resetRecord) {
+            return back()->with('error', 'Invalid or expired reset token.');
+        }
+
+        // Check if token matches
+        if (!Hash::check($request->token, $resetRecord->token)) {
+            return back()->with('error', 'Invalid reset token.');
+        }
+
+        // Check if token is expired (24 hours)
+        if (now()->diffInHours($resetRecord->created_at) > 24) {
+            return back()->with('error', 'Reset token has expired.');
+        }
+
+        // Update password
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->with('error', 'User not found.');
+        }
+
+        $user->update(['password' => Hash::make($request->password)]);
+
+        // Delete token
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return redirect()->route('login')->with('success', 'Password has been reset successfully! Please login with your new password.');
     }
 
     // ===== PROFILE PAGE =====
     public function showProfile()
     {
         $user = User::where('email', session('user_email'))->first();
-        
+
         if (!$user) {
             return redirect()->route('login');
         }
 
         return view('profile', compact('user'));
+    }
+
+    // ===== UPDATE PROFILE =====
+    public function updateProfile(Request $request)
+    {
+        $user = User::where('email', session('user_email'))->first();
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => ['nullable', 'string', 'regex:/^(09|\+639)\d{9}$/'],
+            'address' => 'nullable|string|max:500',
+            'bio' => 'nullable|string|max:1000',
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'bio' => $request->bio,
+        ]);
+
+        // Update session if email changed
+        if ($request->email !== session('user_email')) {
+            session(['user_email' => $request->email]);
+        }
+        if ($request->name !== session('user_name')) {
+            session(['user_name' => $request->name]);
+        }
+
+        return redirect()->route('dashboard')->with('success', 'Profile updated successfully!');
     }
 
     // ===== ADMIN SETTINGS PAGE =====
@@ -201,7 +332,7 @@ class AuthController extends Controller
             $currentValue = Setting::get('admin_registration_enabled', '1');
             $newValue = $currentValue == '1' ? '0' : '1';
             Setting::set('admin_registration_enabled', $newValue);
-            
+
             return response()->json(['success' => true, 'enabled' => $newValue == '1']);
         }
 
@@ -216,7 +347,7 @@ class AuthController extends Controller
     public function uploadProfilePicture(Request $request)
     {
         $user = User::where('email', session('user_email'))->first();
-        
+
         if (!$user) {
             return redirect()->route('login');
         }
@@ -232,7 +363,7 @@ class AuthController extends Controller
 
         // Store new picture
         $path = $request->file('profile_picture')->store('profile-pictures', 'public');
-        
+
         // Update user
         $user->update(['profile_picture' => $path]);
 
@@ -243,7 +374,7 @@ class AuthController extends Controller
     public function deleteProfilePicture(Request $request)
     {
         $user = User::where('email', session('user_email'))->first();
-        
+
         if (!$user) {
             return redirect()->route('login');
         }
@@ -269,7 +400,7 @@ class AuthController extends Controller
 
         // Get only regular users (exclude admins)
         $users = User::where('role', 'user')->orderBy('created_at', 'desc')->get();
-        
+
         return view('admin-users', compact('users'));
     }
 
@@ -282,14 +413,14 @@ class AuthController extends Controller
         }
 
         $user = User::find($id);
-        
+
         if (!$user || $user->role !== 'user') {
             return redirect()->route('admin.users')->with('error', 'User not found.');
         }
 
         // Get user's adoptions
         $adoptions = Adoption::where('adopter_email', $user->email)->orderBy('created_at', 'desc')->get();
-        
+
         return view('admin-user-profile', compact('user', 'adoptions'));
     }
 
@@ -327,6 +458,4 @@ class AuthController extends Controller
 
         return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
     }
-
-    
 }

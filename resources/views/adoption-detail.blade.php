@@ -54,7 +54,7 @@
                 <div class="p-6">
                     <div class="mb-6">
                         @php
-                            $statusLabel = $pet->status ?? 'Pending';
+                        $statusLabel = $pet->status ?? 'Pending';
                         @endphp
                         @if(isset($hasPendingAdoption) && $hasPendingAdoption)
                         <div class="inline-flex items-center px-4 py-2 bg-yellow-400 text-yellow-900 rounded-xl shadow-lg">
@@ -163,6 +163,7 @@
                                 type="text"
                                 id="adopter_name"
                                 name="adopter_name"
+                                value="{{ old('adopter_name', session('user_name', '')) }}"
                                 required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-gray-900 font-medium"
                                 placeholder="Enter your full name">
@@ -186,9 +187,12 @@
                                 type="text"
                                 id="contact"
                                 name="contact"
+                                value="{{ old('contact') }}"
                                 required
+                                pattern="^(09|\+639)\d{9}$"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-gray-900 font-medium"
-                                placeholder="Enter your contact number">
+                                placeholder="e.g., 09171234567 or +639171234567">
+                            <p class="mt-1 text-xs text-gray-500">Philippine mobile number format</p>
                             @error('contact')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -216,27 +220,27 @@
                     <!-- Submit Button -->
                     <div class="mt-8 flex gap-4">
                         @if(isset($hasPendingAdoption) && $hasPendingAdoption)
-                            <div class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-yellow-400 text-yellow-900 font-bold rounded-xl transition-all shadow-lg text-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
-                                </svg>
-                                Pending — Someone has requested adoption
-                            </div>
-                            <a href="{{ route('adoption.list') }}" class="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md inline-flex items-center justify-center">Back to list</a>
+                        <div class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-yellow-400 text-yellow-900 font-bold rounded-xl transition-all shadow-lg text-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                            </svg>
+                            Pending — Someone has requested adoption
+                        </div>
+                        <a href="{{ route('adoption.list') }}" class="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md inline-flex items-center justify-center">Back to list</a>
                         @else
-                            <button
-                                type="submit"
-                                class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">
-                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                </svg>
-                                Submit Adoption Request
-                            </button>
-                            <a
-                                href="{{ route('adoption.list') }}"
-                                class="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md inline-flex items-center justify-center">
-                                Cancel
-                            </a>
+                        <button
+                            type="submit"
+                            class="flex-1 inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                            Submit Adoption Request
+                        </button>
+                        <a
+                            href="{{ route('adoption.list') }}"
+                            class="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border-2 border-gray-300 hover:border-gray-400 transition-all shadow-sm hover:shadow-md inline-flex items-center justify-center">
+                            Cancel
+                        </a>
                         @endif
                     </div>
 
@@ -293,7 +297,7 @@
     photoUploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         photoUploadArea.classList.remove('border-purple-500', 'bg-purple-50');
-        
+
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             photoInput.files = files;

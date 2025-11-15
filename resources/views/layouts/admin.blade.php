@@ -15,15 +15,15 @@
   <div class="min-h-screen">
     <!-- Sidebar (can be hidden by views using @section('hide-sidebar') or for certain routes like adoption.form) -->
     @php
-      // hide sidebar when a view explicitly sets the section, when the hide_sidebar query param is present,
-      // or when rendering the adoption form so the user has a focused adoption flow.
-      $hideSidebar = View::hasSection('hide-sidebar') || request()->query('hide_sidebar') || request()->routeIs('adoption.form');
-      // Only show the sidebar for admin users. Non-admin users will have a clean, full-width layout.
-      $showSidebar = session('role') === 'admin' && !$hideSidebar;
+    // hide sidebar when a view explicitly sets the section, when the hide_sidebar query param is present,
+    // or when rendering the adoption form so the user has a focused adoption flow.
+    $hideSidebar = View::hasSection('hide-sidebar') || request()->query('hide_sidebar') || request()->routeIs('adoption.form');
+    // Only show the sidebar for admin users. Non-admin users will have a clean, full-width layout.
+    $showSidebar = session('role') === 'admin' && !$hideSidebar;
     @endphp
 
-  @if($showSidebar)
-  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white transform transition-all duration-300 ease-in-out shadow-2xl -translate-x-full lg:translate-x-0 flex flex-col top-16">
+    @if($showSidebar)
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white transform transition-all duration-300 ease-in-out shadow-2xl -translate-x-full lg:translate-x-0 flex flex-col top-16">
       <!-- Decorative Background Pattern -->
       <div class="absolute inset-0 opacity-10 pointer-events-none">
         <div class="absolute top-0 left-0 w-40 h-40 bg-pink-500 rounded-full filter blur-3xl"></div>
@@ -32,22 +32,22 @@
 
       <!-- Logo Section -->
       <div class="relative flex items-center justify-between h-20 px-6 bg-gradient-to-r from-purple-950/50 to-pink-950/50 backdrop-blur-sm border-b border-white/10">
-          <div class="flex items-center space-x-4">
-            <!-- Inline logo (original placeholder) -->
-            <div class="relative">
-              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 2a4 4 0 00-4 4c0 2 2 5 4 7 2-2 4-5 4-7a4 4 0 00-4-4z" />
-                  <path d="M6 14c-1 1-2 3-2 4 0 1 1 2 2 2s2-1 2-2c0-1-1-3-2-4zM18 14c1 1 2 3 2 4 0 1-1 2-2 2s-2-1-2-2c0-1 1-3 2-4z" />
-                </svg>
-              </div>
-              <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+        <div class="flex items-center space-x-4">
+          <!-- Inline logo (original placeholder) -->
+          <div class="relative">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2a4 4 0 00-4 4c0 2 2 5 4 7 2-2 4-5 4-7a4 4 0 00-4-4z" />
+                <path d="M6 14c-1 1-2 3-2 4 0 1 1 2 2 2s2-1 2-2c0-1-1-3-2-4zM18 14c1 1 2 3 2 4 0 1-1 2-2 2s-2-1-2-2c0-1 1-3 2-4z" />
+              </svg>
             </div>
-            <div>
-              <h1 class="text-xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">Rescuing Pet Adoption</h1>
-              <p class="text-xs text-purple-200">{{ session('role') === 'admin' ? 'Admin Dashboard' : 'User Dashboard' }}</p>
-            </div>
+            <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
           </div>
+          <div>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">Rescuing Pet Adoption</h1>
+            <p class="text-xs text-purple-200">{{ session('role') === 'admin' ? 'Admin Dashboard' : 'User Dashboard' }}</p>
+          </div>
+        </div>
         <button id="closeSidebar" class="lg:hidden text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-all duration-200">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -117,6 +117,24 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </a>
+
+            <a href="{{ route('admin.feedbacks') }}" class="sidebar-link group {{ request()->routeIs('admin.feedbacks') || request()->routeIs('admin.feedbacks.show') ? 'active' : '' }} block">
+              <div class="sidebar-icon-wrapper">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                </svg>
+              </div>
+              <span class="flex-1">Feedbacks</span>
+              @php
+              $openFeedbacksCount = \App\Models\Feedback::where('status', 'open')->count();
+              @endphp
+              @if($openFeedbacksCount > 0)
+              <span class="px-2 py-0.5 text-xs font-bold bg-blue-500 text-white rounded-full">{{ $openFeedbacksCount }}</span>
+              @endif
+              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
             @else
             <!-- Browse Adoptions link removed for non-admin users per UX request -->
 
@@ -127,6 +145,31 @@
                 </svg>
               </div>
               <span class="flex-1">My Adoptions</span>
+              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+
+            <a href="{{ route('feedback.index') }}" class="sidebar-link group {{ request()->routeIs('feedback.index') || request()->routeIs('feedback.show') ? 'active' : '' }} block">
+              <div class="sidebar-icon-wrapper">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
+                </svg>
+              </div>
+              <span class="flex-1">Community Feedback</span>
+              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+
+            <a href="{{ route('feedback.my') }}" class="sidebar-link group {{ request()->routeIs('feedback.my') ? 'active' : '' }} block">
+              <div class="sidebar-icon-wrapper">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                </svg>
+              </div>
+              <span class="flex-1">My Feedbacks</span>
               <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
@@ -162,13 +205,25 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </a>
+
+            <a href="{{ route('feedback.create') }}" class="sidebar-link group block">
+              <div class="sidebar-icon-wrapper bg-gradient-to-br from-blue-400 to-indigo-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                </svg>
+              </div>
+              <span class="flex-1">Send Feedback</span>
+              <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
           </div>
         </div>
         <!-- Stats Card (Inside Nav) -->
         <div class="mt-2.5">
           @php
-            $totalRescues = \App\Models\Rescue::count();
-            $totalAdopted = \App\Models\Adoption::whereNotNull('adopted_at')->count();
+          $totalRescues = \App\Models\Rescue::count();
+          $totalAdopted = \App\Models\Adoption::whereNotNull('adopted_at')->count();
           @endphp
           <div class="p-3 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-lg border border-white/10 transition-all duration-300">
             <div class="flex items-center justify-between mb-1.5">
@@ -214,12 +269,12 @@
           </button>
         </form>
       </div>
-  </aside>
-  @endif
+    </aside>
+    @endif
 
     <!-- Main Content -->
-      <div class="flex-1 flex flex-col min-h-screen {{ isset($showSidebar) && $showSidebar ? 'lg:ml-72' : '' }}">
-        <!-- Top Navbar -->
+    <div class="flex-1 flex flex-col min-h-screen {{ isset($showSidebar) && $showSidebar ? 'lg:ml-72' : '' }}">
+      <!-- Top Navbar -->
       <header class="bg-gradient-to-r from-white via-purple-50 to-pink-50 backdrop-blur-sm shadow-lg border-b border-purple-100 fixed top-0 right-0 left-0 z-40 h-16">
         <div class="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
           <div class="flex items-center space-x-4">
@@ -262,10 +317,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
               </svg>
               @php
-                $openFeedbacks = 0;
-                if (session('role') === 'admin') {
-                  $openFeedbacks = \App\Models\Feedback::where('status','open')->count();
-                }
+              $openFeedbacks = 0;
+              if (session('role') === 'admin') {
+              $openFeedbacks = \App\Models\Feedback::where('status','open')->count();
+              }
               @endphp
               @if($openFeedbacks > 0)
               <span class="absolute top-1 right-1 flex h-3 w-3">
@@ -280,14 +335,14 @@
               <button @click="open = !open" class="flex items-center space-x-3 px-3 py-2 bg-white hover:bg-purple-50 rounded-xl border border-gray-200 hover:border-purple-200 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md">
                 <div class="relative">
                   @php
-                    $userForProfile = \App\Models\User::where('email', session('user_email'))->first();
+                  $userForProfile = \App\Models\User::where('email', session('user_email'))->first();
                   @endphp
                   @if($userForProfile && $userForProfile->profile_picture)
-                    <img src="{{ asset('storage/' . $userForProfile->profile_picture) }}" alt="{{ session('user_email') }}" class="w-9 h-9 rounded-xl object-cover shadow-lg transform group-hover:scale-105 transition-transform">
+                  <img src="{{ asset('storage/' . $userForProfile->profile_picture) }}" alt="{{ session('user_email') }}" class="w-9 h-9 rounded-xl object-cover shadow-lg transform group-hover:scale-105 transition-transform">
                   @else
-                    <div class="w-9 h-9 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-xl flex items-center justify-center font-bold text-white text-sm shadow-lg transform group-hover:scale-105 transition-transform">
-                      {{ strtoupper(substr(session('user_email', 'A'), 0, 1)) }}
-                    </div>
+                  <div class="w-9 h-9 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-xl flex items-center justify-center font-bold text-white text-sm shadow-lg transform group-hover:scale-105 transition-transform">
+                    {{ strtoupper(substr(session('user_email', 'A'), 0, 1)) }}
+                  </div>
                   @endif
                   <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
                 </div>
@@ -317,11 +372,11 @@
                   <div class="flex items-center space-x-3 mb-2">
                     <div class="relative">
                       @if($userForProfile && $userForProfile->profile_picture)
-                        <img src="{{ asset('storage/' . $userForProfile->profile_picture) }}" alt="{{ session('user_email') }}" class="w-10 h-10 rounded-lg object-cover shadow-md">
+                      <img src="{{ asset('storage/' . $userForProfile->profile_picture) }}" alt="{{ session('user_email') }}" class="w-10 h-10 rounded-lg object-cover shadow-md">
                       @else
-                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-md">
-                          {{ strtoupper(substr(session('user_email', 'A'), 0, 1)) }}
-                        </div>
+                      <div class="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-md">
+                        {{ strtoupper(substr(session('user_email', 'A'), 0, 1)) }}
+                      </div>
                       @endif
                       <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white"></div>
                     </div>
@@ -372,7 +427,7 @@
                 </div>
 
                 @php
-                  $adminRegistrationEnabled = \App\Models\Setting::get('admin_registration_enabled', '1') == '1';
+                $adminRegistrationEnabled = \App\Models\Setting::get('admin_registration_enabled', '1') == '1';
                 @endphp
 
                 @if(session('role') === 'admin')
@@ -401,27 +456,27 @@
                         const originalText = btn.innerHTML;
                         btn.disabled = true;
                         btn.style.opacity = '0.6';
-                        
+
                         fetch(form.action, {
-                          method: 'POST',
-                          headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                          },
-                          body: 'toggle=1'
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                          if (data.success) {
-                            // Reload page to reflect changes
-                            window.location.reload();
-                          }
-                        })
-                        .catch(error => {
-                          btn.disabled = false;
-                          btn.style.opacity = '1';
-                          console.error('Error:', error);
-                        });
+                            method: 'POST',
+                            headers: {
+                              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                              'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: 'toggle=1'
+                          })
+                          .then(response => response.json())
+                          .then(data => {
+                            if (data.success) {
+                              // Reload page to reflect changes
+                              window.location.reload();
+                            }
+                          })
+                          .catch(error => {
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                            console.error('Error:', error);
+                          });
                       });
                     }
                   });
@@ -441,7 +496,7 @@
                 </div>
               </div>
             </div>
-        </div>
+          </div>
       </header>
 
       <!-- Page Content -->
@@ -521,22 +576,22 @@
 
   <!-- Floating Feedback Button (accessible site-wide) -->
   @php
-    $openFeedbacksFloating = 0;
-    try {
-      $openFeedbacksFloating = \App\Models\Feedback::where('status','open')->count();
-    } catch (\Exception $e) {
-      $openFeedbacksFloating = 0;
-    }
+  $openFeedbacksFloating = 0;
+  try {
+  $openFeedbacksFloating = \App\Models\Feedback::where('status','open')->count();
+  } catch (\Exception $e) {
+  $openFeedbacksFloating = 0;
+  }
   @endphp
 
   <a href="{{ route('feedback.create') }}" title="Send Feedback"
-     class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition transform hover:scale-105">
+    class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition transform hover:scale-105">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10l4-4h10a2 2 0 002-2v0"></path>
     </svg>
     <span class="hidden sm:inline font-semibold">Feedback</span>
     @if($openFeedbacksFloating > 0)
-      <span class="ml-2 inline-flex items-center justify-center h-3 w-3 rounded-full bg-white text-pink-600 text-xs font-bold shadow-md"></span>
+    <span class="ml-2 inline-flex items-center justify-center h-3 w-3 rounded-full bg-white text-pink-600 text-xs font-bold shadow-md"></span>
     @endif
   </a>
 

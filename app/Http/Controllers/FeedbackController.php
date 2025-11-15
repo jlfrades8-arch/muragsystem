@@ -57,25 +57,36 @@ class FeedbackController extends Controller
         return view('admin-feedbacks', compact('feedbacks'));
     }
 
-    // User: list feedbacks belonging to the current user (by user_id or email)
+    // User: list all feedbacks (public view for all users)
     public function userIndex()
+    {
+        // Show all feedbacks ordered by newest first
+        $feedbacks = Feedback::with('replies')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('feedback.index', compact('feedbacks'));
+    }
+
+    // User: list only my feedbacks
+    public function myFeedbacks()
     {
         $userId = session('user_id');
         $userEmail = session('user_email');
 
-        $query = Feedback::query();
+        $query = Feedback::with('replies');
         if ($userId) {
             $query->where('user_id', $userId);
         } elseif ($userEmail) {
             $query->where('email', $userEmail);
         } else {
-            // Not logged in and no email - show empty collection
+            // Not logged in - show empty collection
             $feedbacks = collect();
-            return view('feedback.index', compact('feedbacks'));
+            return view('feedback.my', compact('feedbacks'));
         }
 
         $feedbacks = $query->orderBy('created_at', 'desc')->get();
-        return view('feedback.index', compact('feedbacks'));
+        return view('feedback.my', compact('feedbacks'));
     }
 
     // Admin: view feedback detail with replies
@@ -93,31 +104,8 @@ class FeedbackController extends Controller
             return view('admin-feedback-detail', compact('feedback', 'replies'));
         }
 
-        // Owner can view their feedback: match by user_id (logged-in) or email (logged-in or guest),
-        // also allow immediate viewing after submission via session keys for guests.
-        $userId = session('user_id');
-        $userEmail = session('user_email');
-
-        $allowed = false;
-        if ($feedback->user_id && $userId && $feedback->user_id == $userId) {
-            $allowed = true;
-        }
-        if (!$allowed && $feedback->email && $userEmail && $feedback->email === $userEmail) {
-            $allowed = true;
-        }
-        // allow recent guest who just submitted to view via temporary session
-        if (!$allowed && session('last_feedback_id') == $feedback->id) {
-            $allowed = true;
-        }
-        if (!$allowed && session('last_feedback_email') && $feedback->email && session('last_feedback_email') === $feedback->email) {
-            $allowed = true;
-        }
-
-        if ($allowed) {
-            return view('feedback.show', compact('feedback', 'replies'));
-        }
-
-        return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
+        // All users can view any feedback (public view)
+        return view('feedback.show', compact('feedback', 'replies'));
     }
 
     // Admin: store reply to feedback

@@ -24,8 +24,10 @@ class RescueController extends Controller
             'pets.*.condition' => 'required|string',
             'pets.*.kind' => 'required|string',
             'pets.*.color' => 'nullable|string',
-            'pets.*.contact' => 'required|string',
+            'pets.*.contact' => ['required', 'string', 'regex:/^(09|\+639)\d{9}$/'],
             'pets.*.image' => 'nullable|image|mimes:jpg,png|max:10240', // 10MB max
+        ], [
+            'pets.*.contact.regex' => 'Please enter a valid Philippine mobile number (e.g., 09171234567 or +639171234567)'
         ]);
 
         foreach ($validated['pets'] as $index => $petData) {
