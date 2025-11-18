@@ -20,7 +20,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 // Password reset routes
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
-Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::get('/reset-password/{token?}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
 // Registration selection and forms
@@ -34,6 +34,9 @@ Route::post('/register/admin', [AuthController::class, 'registerAdmin'])->name('
 // Dashboard and logout
 Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
 Route::get('/user/dashboard', [AuthController::class, 'showDashboard'])->name('user.dashboard');
+// Dashboard verification (one-time code after sensitive actions)
+Route::get('/dashboard/verify-code', [AuthController::class, 'showDashboardVerify'])->name('dashboard.verify');
+Route::post('/dashboard/verify-code', [AuthController::class, 'postDashboardVerify'])->name('dashboard.verify.post');
 Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
 Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
 Route::post('/profile/upload-picture', [AuthController::class, 'uploadProfilePicture'])->name('profile.upload');
@@ -89,3 +92,4 @@ Route::get('/admin/feedbacks', [FeedbackController::class, 'index'])->name('admi
 Route::get('/admin/feedbacks/{id}', [FeedbackController::class, 'show'])->name('admin.feedbacks.show');
 Route::post('/admin/feedbacks/{id}/reply', [FeedbackController::class, 'storeReply'])->name('admin.feedbacks.reply');
 Route::post('/admin/feedbacks/{id}/close', [FeedbackController::class, 'close'])->name('admin.feedbacks.close');
+Route::delete('/admin/feedbacks/{id}', [FeedbackController::class, 'destroy'])->name('admin.feedbacks.destroy');

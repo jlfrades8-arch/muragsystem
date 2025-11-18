@@ -6,6 +6,12 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto">
+  <div class="mb-4">
+    <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium text-sm transition">
+      <span>←</span>
+      <span class="ml-2">Back</span>
+    </a>
+  </div>
   <div class="bg-white p-6 rounded-lg shadow">
     <div class="flex justify-between items-center mb-6">
       <h3 class="text-lg font-bold">Community Feedbacks</h3>

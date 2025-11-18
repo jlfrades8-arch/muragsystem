@@ -23,7 +23,7 @@
     @endphp
 
     @if($showSidebar)
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white transform transition-all duration-300 ease-in-out shadow-2xl -translate-x-full lg:translate-x-0 flex flex-col top-16">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white transform transition-all duration-300 ease-in-out shadow-2xl -translate-x-full lg:translate-x-0 flex flex-col top-0">
       <!-- Decorative Background Pattern -->
       <div class="absolute inset-0 opacity-10 pointer-events-none">
         <div class="absolute top-0 left-0 w-40 h-40 bg-pink-500 rounded-full filter blur-3xl"></div>
@@ -32,19 +32,14 @@
 
       <!-- Logo Section -->
       <div class="relative flex items-center justify-between h-20 px-6 bg-gradient-to-r from-purple-950/50 to-pink-950/50 backdrop-blur-sm border-b border-white/10">
-        <div class="flex items-center space-x-4">
-          <!-- Inline logo (original placeholder) -->
+          <div class="flex items-center space-x-4">
+          <!-- Logo Image (use same asset as welcome/login for consistency) -->
           <div class="relative">
-            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 2a4 4 0 00-4 4c0 2 2 5 4 7 2-2 4-5 4-7a4 4 0 00-4-4z" />
-                <path d="M6 14c-1 1-2 3-2 4 0 1 1 2 2 2s2-1 2-2c0-1-1-3-2-4zM18 14c1 1 2 3 2 4 0 1-1 2-2 2s-2-1-2-2c0-1 1-3 2-4z" />
-              </svg>
-            </div>
-            <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+            <img src="{{ asset('images/logo/Pet.png') }}" alt="Rescuing Pet Adoption Logo" class="w-14 h-14 object-contain rounded-2xl shadow-xl">
+            <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
           </div>
           <div>
-            <h1 class="text-xl font-bold bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">Rescuing Pet Adoption</h1>
+            <h1 class="text-xl font-bold text-white">Rescuing Pet Adoption</h1>
             <p class="text-xs text-purple-200">{{ session('role') === 'admin' ? 'Admin Dashboard' : 'User Dashboard' }}</p>
           </div>
         </div>
@@ -126,7 +121,13 @@
               </div>
               <span class="flex-1">Feedbacks</span>
               @php
-              $openFeedbacksCount = \App\Models\Feedback::where('status', 'open')->count();
+              $adminUsers = \App\Models\User::where('role', 'admin')->pluck('id');
+              $adminEmails = \App\Models\User::where('role', 'admin')->pluck('email');
+              $openFeedbacksCount = \App\Models\Feedback::where('status', 'open')
+                  ->whereNull('viewed_at')
+                  ->whereNotIn('user_id', $adminUsers)
+                  ->whereNotIn('email', $adminEmails)
+                  ->count();
               @endphp
               @if($openFeedbacksCount > 0)
               <span class="px-2 py-0.5 text-xs font-bold bg-blue-500 text-white rounded-full">{{ $openFeedbacksCount }}</span>
@@ -219,30 +220,7 @@
             </a>
           </div>
         </div>
-        <!-- Stats Card (Inside Nav) -->
-        <div class="mt-2.5">
-          @php
-          $totalRescues = \App\Models\Rescue::count();
-          $totalAdopted = \App\Models\Adoption::whereNotNull('adopted_at')->count();
-          @endphp
-          <div class="p-3 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-lg border border-white/10 transition-all duration-300">
-            <div class="flex items-center justify-between mb-1.5">
-              <p class="text-sm font-semibold text-purple-200 flex items-center">
-                📊 Stats
-              </p>
-            </div>
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between py-1">
-                <span class="text-sm text-purple-200">Total</span>
-                <span class="text-sm font-bold text-white">{{ $totalRescues }}</span>
-              </div>
-              <div class="flex items-center justify-between py-1">
-                <span class="text-sm text-purple-200">Adopted</span>
-                <span class="text-sm font-bold text-green-400">{{ $totalAdopted }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </nav>
 
       <!-- User Info at Bottom -->
@@ -275,7 +253,7 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col min-h-screen {{ isset($showSidebar) && $showSidebar ? 'lg:ml-72' : '' }}">
       <!-- Top Navbar -->
-      <header class="bg-gradient-to-r from-white via-purple-50 to-pink-50 backdrop-blur-sm shadow-lg border-b border-purple-100 fixed top-0 right-0 left-0 z-40 h-16">
+      <header class="bg-gradient-to-r from-white via-purple-50 to-pink-50 backdrop-blur-sm shadow-lg border-b border-purple-100 fixed top-0 right-0 left-0 z-40 h-16 {{ isset($showSidebar) && $showSidebar ? 'lg:left-72' : '' }}">
         <div class="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
           <div class="flex items-center space-x-4">
             <!-- Mobile Menu Button -->
@@ -303,32 +281,7 @@
 
           <!-- Right Side Actions -->
           <div class="flex items-center space-x-3">
-            <!-- Search Button -->
-            <button class="hidden md:flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-purple-600 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-200 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-              <span class="text-sm font-medium">Search</span>
-            </button>
-
-            <!-- Notifications -->
-            <a href="{{ route('feedback.create') }}" class="relative p-2.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-300 group">
-              <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-              </svg>
-              @php
-              $openFeedbacks = 0;
-              if (session('role') === 'admin') {
-              $openFeedbacks = \App\Models\Feedback::where('status','open')->count();
-              }
-              @endphp
-              @if($openFeedbacks > 0)
-              <span class="absolute top-1 right-1 flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-pink-500 border-2 border-white"></span>
-              </span>
-              @endif
-            </a>
+            <!-- Search removed per request -->
 
             <!-- User Avatar & Info (Desktop) with Dropdown -->
             <div class="hidden sm:block relative" x-data="{ open: false }">
@@ -573,27 +526,6 @@
       });
     });
   </script>
-
-  <!-- Floating Feedback Button (accessible site-wide) -->
-  @php
-  $openFeedbacksFloating = 0;
-  try {
-  $openFeedbacksFloating = \App\Models\Feedback::where('status','open')->count();
-  } catch (\Exception $e) {
-  $openFeedbacksFloating = 0;
-  }
-  @endphp
-
-  <a href="{{ route('feedback.create') }}" title="Send Feedback"
-    class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition transform hover:scale-105">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10l4-4h10a2 2 0 002-2v0"></path>
-    </svg>
-    <span class="hidden sm:inline font-semibold">Feedback</span>
-    @if($openFeedbacksFloating > 0)
-    <span class="ml-2 inline-flex items-center justify-center h-3 w-3 rounded-full bg-white text-pink-600 text-xs font-bold shadow-md"></span>
-    @endif
-  </a>
 
   @stack('scripts')
 

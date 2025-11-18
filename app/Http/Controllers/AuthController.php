@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 
 class AuthController extends Controller
 {
@@ -36,7 +37,10 @@ class AuthController extends Controller
         }
 
         // store minimal session info (this app uses session for simple auth)
-        session(['role' => $user->role, 'user_email' => $user->email, 'user_id' => $user->id, 'user_name' => $user->name]);
+        session(['role' => $user->role, 'user_email' => $user->email, 'user_id' => $user->id]);
+
+        // Clear any leftover password-reset / dashboard verification flags from previous flows
+        session()->forget(['requires_dashboard_code', 'post_reset_token', 'post_reset_email', 'dashboard_code_hash', 'dashboard_code_created_at']);
 
         // Ensure admins land on the admin dashboard first
         if ($user->role === 'admin') {
@@ -111,6 +115,14 @@ class AuthController extends Controller
     // ===== DASHBOARD ===== 
     public function showDashboard()
     {
+        // If a password-reset flow is active and requires a one-time code, redirect to verification page
+        // Do not require code for a normal login session.
+        $requiresCode = session('requires_dashboard_code');
+        $hasResetContext = session()->has('post_reset_token') || session()->has('post_reset_email') || session()->has('dashboard_code_hash');
+        if ($requiresCode && $hasResetContext) {
+            return redirect()->route('dashboard.verify');
+        }
+
         $role = session('role');
         if ($role === 'admin') {
             // Eager-load adoptions to avoid N+1 queries
@@ -157,11 +169,99 @@ class AuthController extends Controller
         }
     }
 
+    // ===== SHOW DASHBOARD VERIFICATION FORM =====
+        public function showDashboardVerify()
+        {
+            // If not signed in, go to login
+            if (!session('user_email')) {
+                return redirect()->route('login');
+            }
+
+            return view('dashboard-verify-code');
+        }
+
+        // ===== HANDLE DASHBOARD VERIFICATION =====
+        public function postDashboardVerify(Request $request)
+        {
+            $request->validate([
+                'code' => 'required|string|size:6',
+            ]);
+
+            $email = session('user_email');
+
+            // First, check session-stored dashboard code (preferred for link flow)
+            $valid = false;
+            if (session()->has('dashboard_code_hash')) {
+                $hash = session('dashboard_code_hash');
+                $created = session('dashboard_code_created_at');
+                if (Hash::check($request->code, $hash)) {
+                    if (now()->diffInHours($created) > 24) {
+                        return back()->with('error', 'The code has expired.');
+                    }
+                    $valid = true;
+                }
+            }
+
+            // Fallback: check DB records if session does not have dashboard code
+            if (!$valid) {
+                $record = DB::table('password_reset_tokens')
+                    ->where('email', $email)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($record) {
+                    if (Schema::hasColumn('password_reset_tokens', 'method')) {
+                        if (in_array($record->method, ['dashboard', 'post_reset', 'otp'])) {
+                            if (Hash::check($request->code, $record->token)) {
+                                if (now()->diffInHours($record->created_at) > 24) {
+                                    return back()->with('error', 'The code has expired.');
+                                }
+                                $valid = true;
+                            }
+                        }
+                    } else {
+                        if (Hash::check($request->code, $record->token)) {
+                            if (now()->diffInHours($record->created_at) > 24) {
+                                return back()->with('error', 'The code has expired.');
+                            }
+                            $valid = true;
+                        }
+                    }
+                }
+            }
+
+            if (!$valid) {
+                return back()->with('error', 'Invalid code.');
+            }
+
+            // Success: remove session-stored dashboard code if present, else delete DB dashboard entry
+            if (session()->has('dashboard_code_hash')) {
+                session()->forget('dashboard_code_hash');
+                session()->forget('dashboard_code_created_at');
+            } else {
+                if (Schema::hasColumn('password_reset_tokens', 'method')) {
+                    DB::table('password_reset_tokens')->where('email', $email)->where('method', 'dashboard')->delete();
+                } else {
+                    DB::table('password_reset_tokens')->where('email', $email)->delete();
+                }
+            }
+
+            // Clear requirement and redirect to change-password page with stored token
+            session()->forget('requires_dashboard_code');
+            $token = session('post_reset_token');
+            $emailParam = session('post_reset_email');
+            // clear temporary session values
+            session()->forget('post_reset_token');
+            session()->forget('post_reset_email');
+
+            return redirect()->route('password.reset', ['token' => $token, 'email' => $emailParam]);
+        }
+
     // ===== LOGOUT ===== 
     public function logout()
     {
         Session::flush();
-        return redirect()->route('login')->with('success', 'Logged out successfully!');
+        return redirect()->route('login')->with('success', 'You have logged out.');
     }
 
     // ===== SHOW FORGOT PASSWORD =====
@@ -170,10 +270,11 @@ class AuthController extends Controller
         return view('forgot-password');
     }
 
-    // ===== SEND RESET LINK =====
     public function sendResetLink(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate([
+            'email' => 'required|email',
+        ]);
 
         $user = User::where('email', $request->email)->first();
 
@@ -181,21 +282,27 @@ class AuthController extends Controller
             return back()->with('error', 'We could not find a user with that email address.');
         }
 
-        // Delete old tokens
+        // Delete old tokens for this email
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        // Create new token
+        // Generate reset token
         $token = Str::random(60);
-        DB::table('password_reset_tokens')->insert([
+        $insert = [
             'email' => $request->email,
             'token' => Hash::make($token),
             'created_at' => now(),
-        ]);
+        ];
+
+        if (Schema::hasColumn('password_reset_tokens', 'method')) {
+            $insert['method'] = 'link';
+        }
+
+        DB::table('password_reset_tokens')->insert($insert);
 
         // Generate reset URL
         $resetUrl = route('password.reset', ['token' => $token]) . '?email=' . urlencode($request->email);
 
-        // Send email
+        // Send email with link
         try {
             Mail::send('emails.password-reset', ['resetUrl' => $resetUrl], function ($message) use ($request) {
                 $message->to($request->email)
@@ -232,7 +339,7 @@ class AuthController extends Controller
             return back()->with('error', 'Invalid or expired reset token.');
         }
 
-        // Check if token matches
+        // Ensure token matches (works for both link tokens and OTP codes)
         if (!Hash::check($request->token, $resetRecord->token)) {
             return back()->with('error', 'Invalid reset token.');
         }
@@ -296,9 +403,6 @@ class AuthController extends Controller
         // Update session if email changed
         if ($request->email !== session('user_email')) {
             session(['user_email' => $request->email]);
-        }
-        if ($request->name !== session('user_name')) {
-            session(['user_name' => $request->name]);
         }
 
         return redirect()->route('dashboard')->with('success', 'Profile updated successfully!');

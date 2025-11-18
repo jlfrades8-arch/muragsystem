@@ -20,13 +20,6 @@
           </span>
 
           <div class="flex items-center gap-2">
-            <a href="{{ route('feedback.show', $feedback->id) }}" target="_blank" rel="noopener" class="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 text-sm font-semibold">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              View as User
-            </a>
-
             <a href="{{ route('admin.feedbacks') }}" class="inline-flex items-center px-3 py-1.5 bg-white text-gray-700 border border-gray-200 rounded hover:bg-gray-50 text-sm font-medium">
               Back
             </a>
@@ -55,7 +48,7 @@
   @endif
 
   <!-- Reply Form -->
-  @if($feedback->status === 'open')
+  @if($feedback->status === 'open' && $feedback->user_id !== session('user_id') && $feedback->email !== session('user_email'))
   <div class="bg-white p-6 rounded-lg shadow">
     <h4 class="font-bold mb-4">Send Reply</h4>
     <form action="{{ route('admin.feedbacks.reply', $feedback->id) }}" method="POST">
@@ -72,6 +65,11 @@
         <a href="{{ route('admin.feedbacks') }}" class="text-sm text-gray-500 hover:text-gray-700">Back</a>
       </div>
     </form>
+  </div>
+  @elseif($feedback->user_id === session('user_id') || $feedback->email === session('user_email'))
+  <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+    <p class="text-blue-800"><strong>Note:</strong> This is your own feedback. You cannot reply to your own feedback as an admin.</p>
+    <a href="{{ route('admin.feedbacks') }}" class="text-blue-600 hover:text-blue-700 text-sm mt-3 inline-block">← Back to Feedbacks</a>
   </div>
   @else
   <div class="text-center py-8">

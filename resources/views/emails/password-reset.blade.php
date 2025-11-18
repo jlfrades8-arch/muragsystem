@@ -1,116 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
 
-    .container {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 10px;
-      padding: 30px;
-      text-align: center;
-      color: white;
-    }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
 
-    .logo {
-      width: 80px;
-      height: 80px;
-      background: white;
-      border-radius: 50%;
-      margin: 0 auto 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #a855f7;
+            padding-bottom: 20px;
+        }
 
-    .content {
-      background: white;
-      border-radius: 10px;
-      padding: 30px;
-      margin-top: 20px;
-      color: #333;
-    }
+        .logo {
+            max-width: 100px;
+            margin-bottom: 15px;
+        }
 
-    .button {
-      display: inline-block;
-      padding: 15px 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      margin: 20px 0;
-    }
+        .header h1 {
+            color: #1f2937;
+            margin: 0;
+            font-size: 28px;
+        }
 
-    .footer {
-      text-align: center;
-      margin-top: 30px;
-      color: #666;
-      font-size: 12px;
-    }
+        .content {
+            margin: 30px 0;
+        }
 
-    .link {
-      word-break: break-all;
-      color: #667eea;
-      text-decoration: none;
-    }
-  </style>
+        .content p {
+            margin: 15px 0;
+            font-size: 16px;
+        }
+
+        .reset-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .reset-link:hover {
+            opacity: 0.9;
+        }
+
+        .alt-link {
+            background-color: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .warning {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        strong {
+            color: #1f2937;
+        }
+    </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="logo">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="#667eea">
-        <path d="M12 2a4 4 0 00-4 4c0 2 2 5 4 7 2-2 4-5 4-7a4 4 0 00-4-4z" />
-        <path d="M6 14c-1 1-2 3-2 4 0 1 1 2 2 2s2-1 2-2c0-1-1-3-2-4zM18 14c1 1 2 3 2 4 0 1-1 2-2 2s-2-1-2-2c0-1 1-3 2-4z" />
-      </svg>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="{{ asset('images/logo/Pet.png') }}" alt="Pet Adoption Logo" class="logo">
+            <h1>Password Reset Request</h1>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <p>Hello,</p>
+
+            <p>
+                You are receiving this email because we received a password reset request for your account on the
+                <strong>Pet Adoption System</strong>.
+            </p>
+
+            <p style="text-align: center;">
+                <a href="{{ $resetUrl }}" class="reset-link">Reset Your Password</a>
+            </p>
+
+            <p style="text-align: center; margin-top: 20px;">
+                <strong>Or copy and paste this link in your browser:</strong>
+            </p>
+
+            <div class="alt-link">
+                {{ $resetUrl }}
+            </div>
+
+            <div class="warning">
+                <strong>⏱️ Important:</strong> This password reset link will expire in <strong>24 hours</strong>.
+                If you don't complete the reset within this time, you'll need to request a new one.
+            </div>
+
+            <p>
+                If you did not request a password reset, <strong>no further action is required</strong>. Your password
+                will remain unchanged, and your account will stay secure.
+            </p>
+
+            <p>
+                For security reasons, never share this link with anyone. Pet Adoption System staff will never ask for
+                your password or reset link.
+            </p>
+
+            <p>
+                Best regards,<br>
+                <strong>The Pet Adoption System Team</strong>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                © 2025 Pet Adoption System. Saving lives, one paw at a time. | All rights reserved.<br>
+                If you have any questions, please contact our support team.
+            </p>
+        </div>
     </div>
-    <h1 style="margin: 0; font-size: 28px;">Reset Your Password</h1>
-    <p style="margin: 10px 0 0; font-size: 16px; opacity: 0.9;">Pet Adoption System</p>
-  </div>
-
-  <div class="content">
-    <h2 style="color: #667eea; margin-top: 0;">Hello!</h2>
-
-    <p>You are receiving this email because we received a password reset request for your account.</p>
-
-    <p style="text-align: center;">
-      <a href="{{ $resetUrl }}" class="button">Reset Password</a>
-    </p>
-
-    <p style="font-size: 14px; color: #666;">
-      This password reset link will expire in 24 hours.
-    </p>
-
-    <p style="font-size: 14px; color: #666;">
-      If the button above doesn't work, copy and paste this URL into your browser:
-    </p>
-
-    <p style="background: #f5f5f5; padding: 15px; border-radius: 5px; font-size: 13px;">
-      <a href="{{ $resetUrl }}" class="link">{{ $resetUrl }}</a>
-    </p>
-
-    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-
-    <p style="font-size: 14px; color: #666;">
-      If you did not request a password reset, no further action is required. Your password will remain unchanged.
-    </p>
-  </div>
-
-  <div class="footer">
-    <p>© {{ date('Y') }} Pet Adoption System. All rights reserved.</p>
-    <p>This is an automated message, please do not reply to this email.</p>
-  </div>
 </body>
 
 </html>

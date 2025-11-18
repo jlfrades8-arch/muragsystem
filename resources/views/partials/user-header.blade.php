@@ -73,7 +73,7 @@
             </a>
 
             <!-- My Feedback -->
-            <a href="{{ route('feedback.my') }}" class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 text-center group hover:shadow-md transition-all duration-300 border border-amber-100 hover:border-amber-300">
+            <a href="{{ route('feedback.index') }}" class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 text-center group hover:shadow-md transition-all duration-300 border border-amber-100 hover:border-amber-300">
                 <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>

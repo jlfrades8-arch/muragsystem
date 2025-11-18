@@ -63,6 +63,14 @@
             </p>
           </div>
 
+          <!-- Phone (if available) -->
+          @if($user->phone)
+          <div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Phone</p>
+            <p class="text-sm text-gray-900 font-medium mt-1">{{ $user->phone }}</p>
+          </div>
+          @endif
+
           <!-- Joined Date -->
           <div>
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Joined</p>

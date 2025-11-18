@@ -17,12 +17,7 @@
                 <!-- Logo -->
                 <div class="flex items-center space-x-3">
                     <div class="w-14 h-14">
-                        <div class="w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-xl">
-                            <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M12 2a4 4 0 00-4 4c0 2 2 5 4 7 2-2 4-5 4-7a4 4 0 00-4-4z" />
-                                <path d="M6 14c-1 1-2 3-2 4 0 1 1 2 2 2s2-1 2-2c0-1-1-3-2-4zM18 14c1 1 2 3 2 4 0 1-1 2-2 2s-2-1-2-2c0-1 1-3 2-4z" />
-                            </svg>
-                        </div>
+                        <img src="{{ asset('images/logo/Pet.png') }}" alt="Rescuing Pet Adoption Logo" class="w-14 h-14 object-contain rounded-2xl shadow-xl">
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">

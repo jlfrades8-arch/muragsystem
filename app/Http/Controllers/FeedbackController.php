@@ -53,8 +53,29 @@ class FeedbackController extends Controller
             return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
         }
 
-        $feedbacks = Feedback::orderBy('created_at', 'desc')->get();
-        return view('admin-feedbacks', compact('feedbacks'));
+        // Get admin user IDs and emails
+        $adminUsers = User::where('role', 'admin')->pluck('id');
+        $adminEmails = User::where('role', 'admin')->pluck('email');
+
+        // Get admin feedback (shown at top)
+        $adminFeedbacks = Feedback::where(function ($query) use ($adminUsers, $adminEmails) {
+            $query->whereIn('user_id', $adminUsers)
+                ->orWhereIn('email', $adminEmails);
+        })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Get user feedback (main list)
+        $feedbacks = Feedback::whereNotIn('user_id', $adminUsers)
+            ->where(function ($query) use ($adminUsers) {
+                // Also exclude feedback where email belongs to an admin
+                $adminEmails = User::where('role', 'admin')->pluck('email');
+                $query->whereNotIn('email', $adminEmails);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin-feedbacks', compact('feedbacks', 'adminFeedbacks'));
     }
 
     // User: list all feedbacks (public view for all users)
@@ -101,6 +122,10 @@ class FeedbackController extends Controller
 
         // Admin can view any feedback
         if (session('role') === 'admin') {
+            // Mark feedback as viewed by admin
+            if (!$feedback->viewed_at) {
+                $feedback->update(['viewed_at' => now()]);
+            }
             return view('admin-feedback-detail', compact('feedback', 'replies'));
         }
 
@@ -115,14 +140,19 @@ class FeedbackController extends Controller
             return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
         }
 
-        $request->validate([
-            'message' => 'required|string|min:5',
-        ]);
-
         $feedback = Feedback::find($id);
         if (!$feedback) {
             return redirect()->route('admin.feedbacks')->with('error', 'Feedback not found.');
         }
+
+        // Prevent admins from replying to their own feedback
+        if ($feedback->user_id === session('user_id') || $feedback->email === session('user_email')) {
+            return redirect()->back()->with('error', 'You cannot reply to your own feedback.');
+        }
+
+        $request->validate([
+            'message' => 'required|string|min:5',
+        ]);
 
         FeedbackReply::create([
             'feedback_id' => $feedback->id,
@@ -147,5 +177,26 @@ class FeedbackController extends Controller
 
         $fb->update(['status' => 'closed']);
         return redirect()->route('admin.feedbacks')->with('success', 'Feedback closed.');
+    }
+
+    // Admin: delete feedback
+    public function destroy($id)
+    {
+        if (session('role') !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
+        }
+
+        $feedback = Feedback::find($id);
+        if (!$feedback) {
+            return redirect()->back()->with('error', 'Feedback not found.');
+        }
+
+        // Delete associated replies first
+        FeedbackReply::where('feedback_id', $feedback->id)->delete();
+        
+        // Delete the feedback
+        $feedback->delete();
+
+        return redirect()->back()->with('success', 'Feedback deleted successfully.');
     }
 }

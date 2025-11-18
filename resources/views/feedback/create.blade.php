@@ -40,7 +40,10 @@
       </div>
       <div class="flex items-center gap-3">
         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Send</button>
-        <a href="{{ route('dashboard') }}" class="text-sm text-gray-500 hover:text-gray-700">Cancel</a>
+        <a href="{{ route('feedback.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-medium text-sm transition">
+          <span>←</span>
+          <span class="ml-2">Back</span>
+        </a>
       </div>
     </form>
   </div>

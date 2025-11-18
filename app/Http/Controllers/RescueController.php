@@ -46,6 +46,11 @@ class RescueController extends Controller
             Rescue::create($petData);
         }
 
+        // Redirect to admin reports if user is admin, otherwise to rescue list
+        if (session('role') === 'admin') {
+            return redirect()->route('admin.rescue.reports')->with('success', 'Pet reported successfully!');
+        }
+
         return redirect()->route('rescue.list')->with('success', 'Pet reported successfully!');
     }
 

@@ -16,6 +16,7 @@ class Feedback extends Model
         'email',
         'message',
         'status',
+        'viewed_at',
     ];
 
     public function replies()

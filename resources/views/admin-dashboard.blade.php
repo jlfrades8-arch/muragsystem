@@ -5,6 +5,86 @@
 @section('page-subtitle', 'Overview of all reported pets')
 
 @section('content')
+<!-- Admin Feedback Section - ALWAYS AT TOP -->
+@php
+    // Get admin user IDs and emails to exclude
+    $adminUsers = \App\Models\User::where('role', 'admin')->pluck('id');
+    $adminEmails = \App\Models\User::where('role', 'admin')->pluck('email');
+    
+    // Show only unviewed user feedback (exclude admin feedback)
+    $openFeedbacks = \App\Models\Feedback::where('status', 'open')
+        ->whereNull('viewed_at')
+        ->whereNotIn('user_id', $adminUsers)
+        ->whereNotIn('email', $adminEmails)
+        ->count();
+    
+    $recentFeedbacks = \App\Models\Feedback::where('status', 'open')
+        ->whereNull('viewed_at')
+        ->whereNotIn('user_id', $adminUsers)
+        ->whereNotIn('email', $adminEmails)
+        ->orderBy('created_at', 'desc')
+        ->limit(5)
+        ->get();
+@endphp
+
+@if($openFeedbacks > 0)
+<div class="mb-8 bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 rounded-2xl shadow-lg border-l-4 border-amber-500 overflow-hidden">
+    <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Pending User Feedback</h3>
+                    <p class="text-sm text-amber-700">{{ $openFeedbacks }} open feedback{{ $openFeedbacks !== 1 ? 's' : '' }} awaiting your review</p>
+                </div>
+            </div>
+            <a href="{{ route('admin.feedbacks') }}" class="px-6 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold rounded-lg transition-all shadow-md hover:shadow-lg">
+                View All Feedbacks
+            </a>
+        </div>
+
+        <!-- Recent Feedback Items -->
+        @if($recentFeedbacks->count())
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            @foreach($recentFeedbacks as $feedback)
+            <div class="bg-white rounded-lg p-4 border border-amber-200 hover:shadow-md transition-all">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="flex-1">
+                        <p class="text-xs font-semibold text-amber-700 uppercase tracking-wide">Feedback ID</p>
+                        <p class="text-sm font-bold text-gray-900">#{{ $feedback->id }}</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-700">Open</span>
+                </div>
+                <div class="mb-3">
+                    <p class="text-xs text-gray-600 line-clamp-2">{{ $feedback->message }}</p>
+                </div>
+                <div class="text-xs text-gray-500 mb-3">
+                    <p>{{ $feedback->created_at->format('M d, Y') }}</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{{ route('admin.feedbacks.show', $feedback->id) }}" class="flex-1 inline-flex items-center justify-center text-xs font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded px-2 py-1.5 transition-colors">
+                        Review
+                    </a>
+                    <form action="{{ route('admin.feedbacks.destroy', $feedback->id) }}" method="POST" class="flex-1" onsubmit="return confirm('Delete this feedback? This action cannot be undone.');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full inline-flex items-center justify-center text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded px-2 py-1.5 transition-colors">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+    </div>
+</div>
+@endif
+
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Total Reports Card -->
@@ -95,6 +175,88 @@
                     <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
                 </svg>
                 Happy endings
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Card Section -->
+@php
+    $totalFeedbacks = \App\Models\Feedback::whereNotIn('user_id', $adminUsers)
+        ->whereNotIn('email', $adminEmails)
+        ->count();
+    $closedFeedbacks = \App\Models\Feedback::where('status', 'closed')
+        ->whereNotIn('user_id', $adminUsers)
+        ->whereNotIn('email', $adminEmails)
+        ->count();
+@endphp
+
+<div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Feedback Summary Card -->
+    <div class="group relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-pink-100 hover:border-pink-300 hover:-translate-y-1">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="relative p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-pink-100 text-pink-700 text-xs font-bold rounded-full">Messages</span>
+            </div>
+            <p class="text-sm font-semibold text-gray-600 mb-1">Total Feedback</p>
+            <p class="text-4xl font-black text-gray-900 bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">{{ $totalFeedbacks }}</p>
+            <div class="mt-3 flex items-center text-xs text-pink-600 font-medium">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-11-1a1 1 0 11-2 0 1 1 0 012 0zm3 0a1 1 0 11-2 0 1 1 0 012 0zm3 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd"></path>
+                </svg>
+                User feedback received
+            </div>
+        </div>
+    </div>
+
+    <!-- Open Feedback Card -->
+    <div class="group relative overflow-hidden bg-gradient-to-br from-amber-50 via-white to-orange-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-amber-100 hover:border-amber-300 hover:-translate-y-1">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="relative p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300 animate-pulse">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">Open</span>
+            </div>
+            <p class="text-sm font-semibold text-gray-600 mb-1">Pending Review</p>
+            <p class="text-4xl font-black text-gray-900 bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{{ $openFeedbacks }}</p>
+            <div class="mt-3 flex items-center text-xs text-amber-600 font-medium">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Awaiting attention
+            </div>
+        </div>
+    </div>
+
+    <!-- Resolved Feedback Card -->
+    <div class="group relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-emerald-50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-green-100 hover:border-green-300 hover:-translate-y-1">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="relative p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Resolved</span>
+            </div>
+            <p class="text-sm font-semibold text-gray-600 mb-1">Closed Feedback</p>
+            <p class="text-4xl font-black text-gray-900 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{{ $closedFeedbacks }}</p>
+            <div class="mt-3 flex items-center text-xs text-green-600 font-medium">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Issues resolved
             </div>
         </div>
     </div>
